@@ -1,6 +1,7 @@
-# timeskip
+# Timeskip
 
 **Developed by Michal Leff-Cohen, Hila Buchbut, Shira Shalit, Eran Tzarum and Itamar Shpitzer**
+📄 **[Download Project Book / Documentation]
 
 [רכיבים רשמיים](https://github.com/gamedev-ariel/timeskip/wiki)
 
