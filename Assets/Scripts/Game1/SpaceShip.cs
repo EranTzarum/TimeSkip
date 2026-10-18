@@ -38,8 +38,7 @@ public class SpaceShip : MonoBehaviour
     private System.Collections.IEnumerator QuitAfterDelayAndFlush()
     {
         Debug.Log("Player touched spaceship in 'start' scene. Quitting in 5 seconds after sending logs...");
-        ScreenMessage.Show("You fixed the spaceship and flew home!
-Thanks for playing Time Skip.", 0.6f, 64);
+        ScreenMessage.Show("You fixed the spaceship and flew home!\nThanks for playing Time Skip.", 0.6f, 64);
 
         // Same timing as before (5 s, then save) so session features are unchanged.
         // Upload runs on the logger (it survives the scene change); the ending waits for it only up to a limit.
