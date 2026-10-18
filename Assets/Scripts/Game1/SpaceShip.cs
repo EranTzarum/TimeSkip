@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class SpaceShip : MonoBehaviour
@@ -32,19 +32,32 @@ public class SpaceShip : MonoBehaviour
         }
     }
 
+    // Was a blank screen for 5 s plus the whole upload and model call (can be a minute on a cold Space)
+    private const float MaxSaveWaitSeconds = 10f;
+
     private System.Collections.IEnumerator QuitAfterDelayAndFlush()
     {
         Debug.Log("Player touched spaceship in 'start' scene. Quitting in 5 seconds after sending logs...");
-        yield return new WaitForSeconds(quitDelaySeconds);
+        ScreenMessage.Show("You fixed the spaceship and flew home!
+Thanks for playing Time Skip.", 0.6f, 64);
 
-        // Ensure logs are sent to Supabase (or saved locally) before quitting
+        // Same timing as before (5 s, then save) so session features are unchanged.
+        // Upload runs on the logger (it survives the scene change); the ending waits for it only up to a limit.
+        yield return new WaitForSeconds(quitDelaySeconds);
+        bool saved = false;
         var logger = ExperimentLogger.Instance;
-        if (logger != null)
-        {
-            yield return logger.FlushAndSaveSession();
-        }
+        if (logger != null) logger.StartCoroutine(Flush(logger, () => saved = true));
+        else saved = true;
+        float until = Time.time + MaxSaveWaitSeconds;
+        yield return new WaitUntil(() => saved || Time.time > until);
 
         DoQuit();
+    }
+
+    private static System.Collections.IEnumerator Flush(ExperimentLogger logger, System.Action done)
+    {
+        yield return logger.FlushAndSaveSession();
+        done();
     }
 
     private static void DoQuit()
