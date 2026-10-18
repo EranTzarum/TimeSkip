@@ -57,6 +57,11 @@ public class HubVisuals : MonoBehaviour
         day = SkyLayer("SkyDay", Resources.Load<Texture2D>("Sky/sky_day"), -32000);
         night = SkyLayer("SkyNight", Resources.Load<Texture2D>("Sky/sky_night"), -31999);
         if (night != null) night.color = new Color(1f, 1f, 1f, 0f);
+        // BG_3 is an opaque pale-sky layer that would hide the forest backdrop
+        if (day != null)
+            foreach (var r in FindObjectsByType<SpriteRenderer>(FindObjectsSortMode.None))
+                if (r.sprite != null && r.sprite.texture != null && r.sprite.texture.name.StartsWith("BG_3"))
+                    r.enabled = false;
     }
 
     SpriteRenderer SkyLayer(string name, Texture2D tex, int order)
