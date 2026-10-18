@@ -73,7 +73,8 @@ public class MenuOverlay : MonoBehaviour
         var close = Rect("Close", panel, new Vector2(0.40f, 0.02f), new Vector2(0.60f, 0.10f));
         close.gameObject.AddComponent<Image>().color = new Color(0.95f, 0.78f, 0.25f);
         close.gameObject.AddComponent<Button>().onClick.AddListener(() => Destroy(gameObject));
-        var closeLabel = Label(close, "CLOSE (Esc)", 34, TextAnchor.MiddleCenter);
+        // A GameObject holds one Graphic, so the label goes on a child of the Image
+        var closeLabel = Label(Rect("Label", close, Vector2.zero, Vector2.one), "CLOSE (Esc)", 34, TextAnchor.MiddleCenter);
         closeLabel.color = Color.black;
     }
 
