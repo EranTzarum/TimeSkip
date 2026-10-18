@@ -23,7 +23,7 @@ public partial class ExperimentLogger : MonoBehaviour
     [Header("Supabase Settings")]
     [SerializeField] private string supabaseUrl = "https://npgswaexuhfhinxdxrmx.supabase.co";
     [SerializeField] private string supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5wZ3N3YWV4dWhmaGlueGR4cm14Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzMDc4MjksImV4cCI6MjA4MDg4MzgyOX0.x_scg6fi-dbJ2pKckNXkTUe7j3z2mnsqU1Fr2Emzn24";
-    [SerializeField] private string supabaseTable = "session_logs";
+    [SerializeField] private string supabaseTable = "jam_sessions"; // jam: keeps demo data apart from the 2026 playtest rows
 
     [Header("ML Model API Settings")]
     [Tooltip("HTTP endpoint for the ADHD model /predict API. Example: https://<space-subdomain>.hf.space/predict")]
@@ -104,7 +104,7 @@ public partial class ExperimentLogger : MonoBehaviour
         }
         if (string.IsNullOrWhiteSpace(supabaseTable))
         {
-            supabaseTable = "session_logs";
+            supabaseTable = "jam_sessions"; // jam: keeps demo data apart from the 2026 playtest rows
         }
         // Load Hugging Face token from Scripts/hf_token[.txt] if present
         TryLoadHfTokenFromFile();
