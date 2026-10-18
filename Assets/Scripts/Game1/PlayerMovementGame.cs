@@ -25,15 +25,21 @@ public class PlayerMovementGame : MonoBehaviour
 
     void Update()
     {
-        float moveX = Input.GetAxisRaw("Horizontal");
+        float moveX = DevInput.Horizontal(Input.GetAxisRaw("Horizontal"));
         rb.linearVelocity = new Vector2(moveX * speed, rb.linearVelocity.y);
 
-        // Only jump from the ground; unlimited air jumps let kids fly over the level
-        if (Input.GetKeyDown(KeyCode.Space) && IsGrounded())
+        // Ground jump + one air jump. Unlimited air jumps let kids fly over the level; ground-only
+        // jumps got them stuck on obstacles the level was built around.
+        bool grounded = IsGrounded();
+        if (grounded) airJumpsLeft = airJumps;
+        if (Input.GetKeyDown(KeyCode.Space) && (grounded || airJumpsLeft-- > 0))
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
         }
     }
+
+    [SerializeField] private int airJumps = 1;
+    private int airJumpsLeft;
 
     private readonly ContactPoint2D[] contacts = new ContactPoint2D[8];
 

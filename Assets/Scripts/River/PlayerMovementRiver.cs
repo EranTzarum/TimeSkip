@@ -25,7 +25,7 @@ public class PlayerMovementRiver : MonoBehaviour
 
     void Update()
     {
-        float moveX = Input.GetAxisRaw("Horizontal"); 
+        float moveX = DevInput.Horizontal(Input.GetAxisRaw("Horizontal")); 
         rb.linearVelocity = new Vector2(moveX * speed, rb.linearVelocity.y);
 
         if (Input.GetKeyDown(KeyCode.Space))

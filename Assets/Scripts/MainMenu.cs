@@ -29,13 +29,11 @@ public class MainMenu : MonoBehaviour
 
     public void ShowInfo()
     {
-        // ��� �� ���� �����
-        SceneManager.LoadScene("InfoScene");
+        MenuOverlay.ShowInfo();
     }
     public void ShowStatistics()
     {
-        // ��� �� ���� �����
-        SceneManager.LoadScene("InfoScene");
+        MenuOverlay.ShowStatistics();
     }
 
     public void Forest()

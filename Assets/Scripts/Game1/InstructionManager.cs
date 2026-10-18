@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
@@ -149,6 +150,7 @@ public class InstructionManager : MonoBehaviour
                 instructionText.text = "";
                 currentState = InstructionState.Completed;
             }
+            BuildGateWalls();
         }
     }
 
@@ -183,99 +185,138 @@ public class InstructionManager : MonoBehaviour
                 }
                 break;
 
-            case InstructionState.WaitingForEnter:
-                // House: load "MemoryGame" scene
-                if (Input.GetKeyDown(KeyCode.Return))
-                {
-                    SceneManager.LoadScene("MemoryGame");
-                }
-                break;
-
-            case InstructionState.WaitingForRock:
-                // Rock: load "river" scene
-                if (Input.GetKeyDown(KeyCode.Return))
-                {
-                    SceneManager.LoadScene("river");
-                }
-                break;
-
-            case InstructionState.WaitingForTerrain:
-                // Terrain: load "forest" scene
-                if (Input.GetKeyDown(KeyCode.Return))
-                {
-                    SceneManager.LoadScene("forest");
-                }
-                break;
-
             case InstructionState.Completed:
                 // Do nothing; instructions are done
                 break;
         }
+        UpdateGate();
     }
 
-    // -------------- House Triggers --------------
-    public void TriggerHouseInstruction()
+    // -------------- Hub gates (Start scene) --------------
+    // Each minigame entrance blocks the path until the child enters it (Enter) or skips it (3 jumps).
+    // The prompt shows once on arrival and the voice repeats every few seconds, instead of
+    // re-firing every time the player's collider brushes the trigger edge.
+    private static readonly HashSet<string> clearedGates = new HashSet<string>();
+    private readonly Dictionary<string, GameObject> gateWalls = new Dictionary<string, GameObject>();
+    private readonly List<float> skipJumpTimes = new List<float>();
+    private string activeGate, activeGateScene;
+    private float nextVoiceAt;
+    private const float VoiceRepeatSeconds = 8f, SkipWindowSeconds = 3f;
+    private const int SkipJumps = 3;
+
+    private static readonly Dictionary<string, (string scene, string action)> gateInfo = new Dictionary<string, (string, string)>
     {
-        if (currentState != InstructionState.WaitingForEnter)
+        { "house", ("MemoryGame", "enter the dwarf's house") },
+        { "rock", ("river", "go to the river") },
+        { "terrain", ("forest", "go to the forest") },
+    };
+    // Original trigger + tall GateZone overlap, so count overlaps instead of toggling on every enter/exit
+    private readonly Dictionary<string, int> gateOverlaps = new Dictionary<string, int>();
+
+    public void TriggerHouseInstruction() => EnterGate("house");
+    public void ClearHouseInstruction() => ExitGate("house");
+    public void TriggerRockInstruction() => EnterGate("rock");
+    public void ClearRockInstruction() => ExitGate("rock");
+    public void TriggerTerrainInstruction() => EnterGate("terrain");
+    public void ClearTerrainInstruction() => ExitGate("terrain");
+
+    public void EnterGate(string gate)
+    {
+        gateOverlaps.TryGetValue(gate, out int n);
+        gateOverlaps[gate] = n + 1;
+        if (activeGate == gate) return;
+        activeGate = gate;
+        activeGateScene = gateInfo[gate].scene;
+        skipJumpTimes.Clear();
+        currentState = InstructionState.Completed; // tutorial steps no longer apply
+        instructionText.color = Color.black;
+        string action = gateInfo[gate].action;
+        instructionText.text = clearedGates.Contains(gate)
+            ? $"Press ENTER to {action}."
+            : $"Press ENTER to {action}.\n(Or jump 3 times to skip it.)";
+        if (Time.time >= nextVoiceAt)
         {
-            currentState = InstructionState.WaitingForEnter;
-            instructionText.color = Color.black;
-            instructionText.text = "Click enter to enter the house.";
-            // Voice prompt for Enter instruction (house)
             PlayInstructionVoice();
+            nextVoiceAt = Time.time + VoiceRepeatSeconds;
         }
     }
 
-    public void ClearHouseInstruction()
+    public void ExitGate(string gate)
     {
-        if (currentState == InstructionState.WaitingForEnter)
-        {
-            instructionText.color = Color.white;
-            instructionText.text = "";
-            currentState = InstructionState.Completed;
-        }
+        gateOverlaps.TryGetValue(gate, out int n);
+        gateOverlaps[gate] = Mathf.Max(0, n - 1);
+        if (gateOverlaps[gate] > 0 || activeGate != gate) return;
+        activeGate = null;
+        instructionText.color = Color.white;
+        instructionText.text = "";
     }
 
-    // -------------- Rock Triggers --------------
-    public void TriggerRockInstruction()
+    void UpdateGate()
     {
-        if (currentState != InstructionState.WaitingForRock)
+        if (activeGate == null) return;
+        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
         {
-            currentState = InstructionState.WaitingForRock;
-            instructionText.text = "Click enter to go to the river.";
-            // Voice prompt for Enter instruction (river)
+            ClearGate(activeGate);
+            SceneManager.LoadScene(activeGateScene);
+            return;
+        }
+        if (Input.GetKeyDown(KeyCode.Space) && !clearedGates.Contains(activeGate))
+        {
+            skipJumpTimes.Add(Time.time);
+            skipJumpTimes.RemoveAll(t => Time.time - t > SkipWindowSeconds);
+            if (skipJumpTimes.Count >= SkipJumps)
+            {
+                ClearGate(activeGate);
+                instructionText.text = "Skipped! You can keep going.";
+                return;
+            }
+        }
+        if (Time.time >= nextVoiceAt)
+        {
             PlayInstructionVoice();
+            nextVoiceAt = Time.time + VoiceRepeatSeconds;
         }
     }
 
-    public void ClearRockInstruction()
+    void ClearGate(string gate)
     {
-        if (currentState == InstructionState.WaitingForRock)
-        {
-            instructionText.text = "";
-            currentState = InstructionState.Completed;
-        }
+        clearedGates.Add(gate);
+        if (gateWalls.TryGetValue(gate, out var wall) && wall != null) Destroy(wall);
+        gateWalls.Remove(gate);
     }
 
-    // -------------- Terrain Triggers --------------
-    public void TriggerTerrainInstruction()
+    // Invisible wall just past each entrance (on the side away from the player's start), removed when cleared.
+    void BuildGateWalls()
     {
-        if (currentState != InstructionState.WaitingForTerrain)
+        var player = GameObject.FindGameObjectWithTag("Player");
+        float startX = player != null ? player.transform.position.x : float.NegativeInfinity;
+        void Build(Component trigger, string gate)
         {
-            currentState = InstructionState.WaitingForTerrain;
-            instructionText.text = "Click enter to go to the forest.";
-            // Voice prompt for Enter instruction (forest)
-            PlayInstructionVoice();
+            if (trigger == null || clearedGates.Contains(gate)) return;
+            var col = trigger.GetComponent<Collider2D>();
+            if (col == null) return;
+            var b = col.bounds;
+            float x = b.center.x >= startX ? b.max.x + 0.3f : b.min.x - 0.3f;
+            const float height = 60f; // covers every platform height at this x
+            var wall = new GameObject("GateWall_" + gate);
+            wall.transform.position = new Vector3(x, b.center.y, 0f);
+            wall.AddComponent<BoxCollider2D>().size = new Vector2(0.4f, height);
+            gateWalls[gate] = wall;
+            // Tall trigger zone from the entrance to the wall, so the prompt shows at any height
+            var zone = new GameObject("GateZone_" + gate);
+            float zoneMin = Mathf.Min(b.min.x, x), zoneMax = Mathf.Max(b.max.x, x);
+            zone.transform.position = new Vector3((zoneMin + zoneMax) / 2f, b.center.y, 0f);
+            var zc = zone.AddComponent<BoxCollider2D>();
+            zc.isTrigger = true;
+            zc.size = new Vector2(zoneMax - zoneMin, height);
+            var gz = zone.AddComponent<GateZone>();
+            gz.instructionManager = this;
+            gz.gate = gate;
+            Debug.Log($"[Gate] {gate} trigger {b.center} size {b.size} wall x={x}");
         }
-    }
-
-    public void ClearTerrainInstruction()
-    {
-        if (currentState == InstructionState.WaitingForTerrain)
-        {
-            instructionText.text = "";
-            currentState = InstructionState.Completed;
-        }
+        Build(FindAnyObjectByType<HouseTrigger2D>(), "house");
+        Build(FindAnyObjectByType<RockTrigger2D>(), "rock");
+        Build(FindAnyObjectByType<TerrainTrigger2D>(), "terrain");
     }
 
     // Make sure there is an EventSystem in the scene

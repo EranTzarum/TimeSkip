@@ -255,6 +255,13 @@ public partial class ExperimentLogger
             else
             {
                 string resp = req.downloadHandler.text;
+                // Keep the model's answer next to the session file, for the clinician STATISTICS view only
+                try
+                {
+                    if (!string.IsNullOrEmpty(LastLocalSessionPath))
+                        File.WriteAllText(Path.ChangeExtension(LastLocalSessionPath, ".prediction.json"), resp ?? "", Encoding.UTF8);
+                }
+                catch (Exception ex) { Debug.LogWarning($"[ExperimentLogger] Could not save prediction: {ex.Message}"); }
                 if (!string.IsNullOrEmpty(resp) && resp.Length > 500) resp = resp.Substring(0, 500) + "...";
                 Debug.Log($"[ExperimentLogger] Model API response ({req.responseCode}): {resp}");
 

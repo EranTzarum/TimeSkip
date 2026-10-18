@@ -15,6 +15,8 @@ public static class BuildScript
     {
         // Lets the compressed build run from any static server (localhost, itch) without Content-Encoding headers
         PlayerSettings.WebGL.decompressionFallback = true;
+        // Gzip: Brotli added minutes to every build on this laptop
+        PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Gzip;
         Build(BuildTarget.WebGL, "Builds/WebGL");
     }
 
