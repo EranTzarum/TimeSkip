@@ -6,6 +6,8 @@ log('house wall', walk_to(52, 1, 40)['x']); key('Enter'); sleep(9); log('scene',
 click(0.21, 0.63); sleep(0.4); shot('mem_wrong')
 for fx in (0.48, 0.60, 0.21, 0.21):
     sleep(1.2); click(fx, 0.63); sleep(7.5)
+t0 = time.time()  # the kitchen load can lag; wait for its player
+while time.time() - t0 < 20 and (P().get('s') != 'kitchen' or P().get('x') is None): sleep(0.5)
 log('after memory', P()); shot('kitchen')
 for _ in range(10):
     hold(0, 0.5, -1); sleep(0.55)

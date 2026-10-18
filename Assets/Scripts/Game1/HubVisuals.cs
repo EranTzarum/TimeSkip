@@ -13,6 +13,7 @@ public class HubVisuals : MonoBehaviour
     // Hub x positions (see docs/TAKEOVER): forest gate ~27, house ~49, river ~117, spaceship ~125
     const float NightStart = 36f, NightFull = 46f, NightEnd = 96f, DayAgain = 108f;
     const float SkyParallax = 0.03f;
+    const float RiverAreaX = 100f; // the river gate is at ~117
     const float FloorY = -3.0f, FeetDrop = 0.35f; // ponytail: hand-tuned for the Start floor; adjust if the art moves
 
     Camera cam;
@@ -64,6 +65,11 @@ public class HubVisuals : MonoBehaviour
             foreach (var r in FindObjectsByType<SpriteRenderer>(FindObjectsSortMode.None))
                 if (r.sprite != null && r.sprite.texture != null && r.sprite.texture.name.StartsWith("BG_3"))
                     r.enabled = false;
+        // TobaccoLand trees carry a flat cyan sky band on top; Eran wants that sky only near the river
+        foreach (var r in FindObjectsByType<SpriteRenderer>(FindObjectsSortMode.None))
+            if (r.sprite != null && r.sprite.texture != null && r.sprite.texture.name.StartsWith("Forest Parralax layer4")
+                && r.bounds.center.x < RiverAreaX)
+                r.enabled = false;
         // The painted layers around the house (BG_1, BG_2) are opaque, so they get the night as a tint
         foreach (var r in FindObjectsByType<SpriteRenderer>(FindObjectsSortMode.None))
             if (r.enabled && r.sprite != null && r.sprite.texture != null
