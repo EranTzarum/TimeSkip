@@ -1,0 +1,10 @@
+# Hub visuals tour: sharp pixels, guide arrow, feet, sky fade (if images exist).
+exec(open('lib.py').read())
+click(0.54, 0.465); sleep(3.5); shot('hub_start_feet')
+walk_to(20, 1, 60); shot('hub_guide_forest')
+walk_to(33, 1, 60)
+for _ in range(3): key('Space'); sleep(0.3)
+walk_to(46, 1, 40); shot('hub_house_dusk')
+for _ in range(3): key('Space'); sleep(0.3)
+walk_to(80, 1, 60); shot('hub_night_guide_river')
+walk_to(104, 1, 60); shot('hub_dawn')
