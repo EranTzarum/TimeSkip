@@ -127,6 +127,9 @@ public class InstructionManager : MonoBehaviour
         else if (isDwarf)
         {
             PlayStartPromptVoice();
+            // Was left at WaitingForJump, so Space in the memory game showed the arrow-key tutorial
+            instructionText.text = "";
+            currentState = InstructionState.Completed;
         }
         else
         {
@@ -278,7 +281,7 @@ public class InstructionManager : MonoBehaviour
     // Make sure there is an EventSystem in the scene
     void EnsureEventSystem()
     {
-        if (FindObjectOfType<EventSystem>() == null)
+        if (FindAnyObjectByType<EventSystem>() == null)
         {
             GameObject eventSystemGO = new GameObject("EventSystem");
             eventSystemGO.AddComponent<EventSystem>();
