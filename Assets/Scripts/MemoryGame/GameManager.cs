@@ -145,6 +145,7 @@ public class GameManager : MonoBehaviour
             lives--;
             try { ExperimentLogger.Instance?.LogMemoryClick(false, currentLevel, lives); } catch (Exception) { }
             uiManager.UpdateLives(lives);
+            if (lives > 0) uiManager.ShowWrongAnswer();
             if (lives <= 0)
             {
                 try {

@@ -55,6 +55,28 @@ public class UIManagerMG : MonoBehaviour
         livesText.text = "Lives: " + lives;
     }
 
+    // UI-only feedback for a wrong pick; the question stays clickable
+    Coroutine wrongFlash;
+    string flashOriginal;
+    Color flashColor;
+    public void ShowWrongAnswer()
+    {
+        if (questionText == null) return;
+        if (wrongFlash != null) StopCoroutine(wrongFlash);
+        else { flashOriginal = questionText.text; flashColor = questionText.color; }
+        wrongFlash = StartCoroutine(FlashWrong());
+    }
+
+    IEnumerator FlashWrong()
+    {
+        questionText.text = "Not that one - try again!";
+        questionText.color = new Color(1f, 0.45f, 0.45f);
+        yield return new WaitForSeconds(1.2f);
+        questionText.text = flashOriginal;
+        questionText.color = flashColor;
+        wrongFlash = null;
+    }
+
     public void ShowGameOver()
     {
         gameOverPanel.SetActive(false);
