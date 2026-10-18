@@ -1,0 +1,20 @@
+exec(open('lib.py').read())
+click(0.54, 0.465); sleep(3.5)
+walk_to(20, 1, 60); walk_to(33, 1, 60)
+for _ in range(3): key('Space'); sleep(0.3)
+log('house wall', walk_to(52, 1, 40)['x']); key('Enter'); sleep(9); log('scene', P()['s'])
+click(0.21, 0.63); sleep(0.4); shot('mem_wrong')
+for fx in (0.48, 0.60, 0.21, 0.21):
+    sleep(1.2); click(fx, 0.63); sleep(7.5)
+log('after memory', P()); shot('kitchen')
+for _ in range(10):
+    hold(0, 0.5, -1); sleep(0.55)
+    if P().get('s') == 'Start': break
+log('back', P()['s'], P().get('x'))
+for tx in (80, 104, 121): walk_to(tx, 1, 60)
+for _ in range(3): key('Space'); sleep(0.3)
+sleep(1); p = walk_to(140, 1, 30); sleep(2); shot('ending')
+t0=time.time()
+while time.time()-t0<25 and P().get('s')!='main': sleep(0.5)
+log('menu after', round(time.time()-t0+2,1), 's', P().get('s'), since(0,'Supabase|ExperimentLogger').replace(chr(10),'')[-200:])
+click(0.54, 0.63); sleep(2); shot('stats')

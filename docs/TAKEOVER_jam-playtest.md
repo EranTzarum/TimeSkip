@@ -1,5 +1,5 @@
 # TAKEOVER — jam playtest and flow fixes
-Last updated: 2026-10-18 21:30 · branch `jam/s1-stabilize` @ `e4b3db0`
+Last updated: 2026-10-18 20:30 · branch `jam/s1-stabilize` @ `ca94726`
 
 ## Goal
 Sheba ARC Healthcare Game Jam (submit Mon 2026-10-19 16:00, demo 17:00). Make Time Skip demo-ready: fix bugs, edge cases and the game flow first; UI polish, clinician report and pitch come after. The full plan and timeline are in `C:\Users\tzaru\Documents\TimeSkip\JAM_PLAN.md`.
@@ -26,38 +26,35 @@ Sheba ARC Healthcare Game Jam (submit Mon 2026-10-19 16:00, demo 17:00). Make Ti
   - entering the forest with Enter, and "go to main game" returning to the same spot with the gate cleared;
   - the house 3-jump skip.
 
-## Where we stopped
-`e4b3db0` is committed but **not verified**:
-- the end-panel message as a separate centered label (the old MessageText parents two of the buttons);
-- `DevInput.Jump`.
+## Playtest results (2026-10-18 evening, WebGL, bots in tools/playtest)
+Verified by playing:
+- **Hub:** gate prompt; Enter enters; 3-jump skip; walls hold (house 50.4, river 122.2); return to the same spot.
+- **Memory:** wrong answer drops a life and now shows "Not that one - try again!"; all 4 levels pass, then the kitchen.
+- **Kitchen:** new hint on screen; walking down through the door returns to Start.
+- **Ending:** spaceship shows a thank-you message, then the menu after about 6 s; STATISTICS shows the session.
+- **Forest:** catching screws works (2 caught in one run); 90 s timeout ends the round.
+- **River:** loses come easily; a pass was not reached by the bot (rocks have no tag or RockId).
 
-The WebGL rebuild was stopped before it finished. To rebuild, from the repo root:
-```bash
-"/c/Program Files/Unity/Hub/Editor/6000.0.28f1/Editor/Unity.exe" -batchmode -quit -projectPath "$(pwd -W)" -executeMethod BuildScript.BuildWebGL -logFile "$(cygpath -w "$TMP")\\build-webgl.log"
-```
-Then patch the build so the page can call the game:
-```bash
-sed -i 's/\.then((unityInstance) => {/.then((unityInstance) => { window.unityInstance = unityInstance;/' Builds/WebGL/index.html
-```
-Serve it with the browser pane `preview_start` name `webgl` (config in `C:\Users\tzaru\Documents\TimeSkip\.claude\launch.json`, port 8765).
+Fixed this session (commits `32aa47b`..`ca94726`):
+- gate walls 3 units thick: a frame stall tunneled through the old 0.4 wall;
+- memory wrong-answer feedback (UI only);
+- kitchen hint (`ScreenMessage` helper);
+- ending: message on screen; waits for the upload at most 10 s, with the same 5 s timing before the save;
+- CLOSE label on INFO and STATISTICS was invisible (two Graphics on one object);
+- `DevInput`: vertical axis, Where finds untagged players and lists nearby objects.
+
+## Where we stopped
+Final WebGL and Windows builds were running. Check the exe launches, then the checklist rows 11-12.
 
 ## Next steps
-1. Rebuild WebGL (~10 min, Gzip) and serve it.
-2. Play like a real player, without a screenshot for every move.
-   - Drive input from page JS: `unityInstance.SendMessage('DevInput','Hold','1,2')` (direction, seconds), `'Jump'`, and `'Where'` (logs the player position). Capture console logs in JS.
-   - Use real key taps (`computer key`) for Space and Enter.
-   - Screenshot only to confirm a result.
-3. Edge cases:
-   - **Forest:** collect all 5 screws, hit a berry, time out. It's an auto-scroller, so standing still drifts off-screen.
-   - **River:** fail it and pass it. The entrance trigger is around x 112–122.
-   - **Memory game:** pass all 4 levels. The correct option index is Q1: 2/3/4, Q2: 3, Q3: 0, Q4: 0. Also lose 3 lives.
-   - **Kitchen:** after a memory win the game loads `kitchen`, which needs vertical movement (DevInput has none yet). Check whether a child gets lost there.
-   - **Ending:** reach the spaceship at x=125 and confirm the session appears in STATISTICS.
-4. Fix what breaks, commit small, then rebuild the Windows exe.
+1. Decide the open item below (forest and river top edge).
+2. UI polish: gate prompt overlaps the player and is hard to read; forest player is tiny at the bottom; Fire Emblem tiles.
+3. Clinician report, pitch, trailer, submission.
 
 ## Open decisions
-- Kitchen after a memory win: keep the detour or return to Start? Returning changes the scene-visit logs, which goes against the team rule, so ask Eran first. Recommendation: return to Start only if a child gets lost.
-- Untracked Unity-generated files (see below): commit or ignore? Recommendation: ignore. Itamar deliberately removed the AOT stubs.
+- **Leaving through the top of the screen counts as a loss** (forest and river). In the forest, bouncing on a mushroom does it; in the river, Space has unlimited air jumps, so spamming it does it in ~7 s. Ignoring the top edge would be friendlier, but `out_of_bounds` counts are model features, so it changes the data. Needs Eran (and Itamar). Recommendation: leave as-is for the jam, mention it in the pitch as a known design point.
+- **Standing still loses fast** (forest ~4 s, river ~2-3 s after the countdown): by design (auto-scroller), same data concern.
+- Untracked Unity-generated files: ignore (unchanged recommendation).
 
 ## Owner to-dos
 - Ask Itamar which pkl the Space should serve (`noise_model.pkl` vs `adhd_model.pkl`), and whether `game_dataset.csv` comes from real children.
