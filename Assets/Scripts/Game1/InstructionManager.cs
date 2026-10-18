@@ -151,6 +151,7 @@ public class InstructionManager : MonoBehaviour
                 currentState = InstructionState.Completed;
             }
             BuildGateWalls();
+            ShowProgress();
         }
     }
 
@@ -197,6 +198,7 @@ public class InstructionManager : MonoBehaviour
     // The prompt shows once on arrival and the voice repeats every few seconds, instead of
     // re-firing every time the player's collider brushes the trigger edge.
     private static readonly HashSet<string> clearedGates = new HashSet<string>();
+    private static readonly HashSet<string> visitedGates = new HashSet<string>(); // entered with ENTER (not skipped)
     private readonly Dictionary<string, GameObject> gateWalls = new Dictionary<string, GameObject>();
     private readonly List<float> skipJumpTimes = new List<float>();
     private string activeGate, activeGateScene;
@@ -229,7 +231,7 @@ public class InstructionManager : MonoBehaviour
         activeGateScene = gateInfo[gate].scene;
         skipJumpTimes.Clear();
         currentState = InstructionState.Completed; // tutorial steps no longer apply
-        instructionText.color = Color.black;
+        instructionText.color = new Color(1f, 0.9f, 0.35f); // gate prompts stand out from tutorial text
         string action = gateInfo[gate].action;
         instructionText.text = clearedGates.Contains(gate)
             ? $"Press ENTER to {action}."
@@ -257,6 +259,7 @@ public class InstructionManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
         {
             ClearGate(activeGate);
+            visitedGates.Add(activeGate);
             SceneManager.LoadScene(activeGateScene);
             return;
         }
@@ -333,62 +336,67 @@ public class InstructionManager : MonoBehaviour
         }
     }
 
-    // Helper method to set up a Canvas + Text in World Space
+    // Instruction banner: screen-space panel at the top, so the text never covers the player.
+    // (Was a magenta world-space text in the middle of the screen.)
+    Image bannerPanel;
+
     void SetupCanvasAndText()
     {
-        // Create a Canvas (World Space)
         GameObject canvasGO = new GameObject("InstructionCanvas");
         Canvas canvas = canvasGO.AddComponent<Canvas>();
-        canvas.renderMode = RenderMode.WorldSpace;
-        canvas.worldCamera = Camera.main;
-
-        // If there is a main camera, place the canvas in front of it
-        if (Camera.main != null)
-        {
-            canvasGO.transform.SetParent(Camera.main.transform);
-            canvasGO.transform.localPosition = new Vector3(0f, 0f, 2f);
-            canvasGO.transform.localRotation = Quaternion.identity;
-        }
-        else
-        {
-            // Fallback if no main camera is found
-            canvasGO.transform.position = new Vector3(0f, 0f, -9f);
-        }
-        // Scale down the canvas
-        canvasGO.transform.localScale = Vector3.one * 0.01f;
-
-        // Adjust RectTransform size
-        RectTransform canvasRT = canvasGO.GetComponent<RectTransform>();
-        canvasRT.sizeDelta = new Vector2(800, 600);
-
-        // Optional: add CanvasScaler and GraphicRaycaster
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 10;
         CanvasScaler scaler = canvasGO.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(800, 600);
-        canvasGO.AddComponent<GraphicRaycaster>();
+        scaler.referenceResolution = new Vector2(1920, 1080);
+        scaler.matchWidthOrHeight = 0.5f;
 
-        // Create a Text object for instructions
+        GameObject panelGO = new GameObject("InstructionPanel");
+        panelGO.transform.SetParent(canvasGO.transform, false);
+        bannerPanel = panelGO.AddComponent<Image>();
+        bannerPanel.color = new Color(0.05f, 0.07f, 0.12f, 0.78f);
+        bannerPanel.raycastTarget = false;
+        RectTransform panelRT = bannerPanel.rectTransform;
+        panelRT.anchorMin = new Vector2(0.12f, 0.80f);
+        panelRT.anchorMax = new Vector2(0.88f, 0.97f);
+        panelRT.offsetMin = panelRT.offsetMax = Vector2.zero;
+        panelGO.AddComponent<Outline>().effectColor = new Color(1f, 0.85f, 0.3f, 0.9f);
+
         GameObject textGO = new GameObject("InstructionText");
-        textGO.transform.SetParent(canvasGO.transform, false);
+        textGO.transform.SetParent(panelGO.transform, false);
         instructionText = textGO.AddComponent<Text>();
-
-        // Use LegacyRuntime font instead of Arial
         instructionText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        // Make text bigger
-        instructionText.fontSize = 56;
-        // Center alignment and color
+        instructionText.fontSize = 46;
+        instructionText.fontStyle = FontStyle.Bold;
         instructionText.alignment = TextAnchor.MiddleCenter;
-        instructionText.color = Color.magenta;
-        // Wrap text properly
+        instructionText.color = Color.white;
         instructionText.horizontalOverflow = HorizontalWrapMode.Wrap;
         instructionText.verticalOverflow = VerticalWrapMode.Overflow;
+        instructionText.raycastTarget = false;
+        RectTransform textRT = instructionText.rectTransform;
+        textRT.anchorMin = Vector2.zero;
+        textRT.anchorMax = Vector2.one;
+        textRT.offsetMin = new Vector2(30f, 10f);
+        textRT.offsetMax = new Vector2(-30f, -10f);
+    }
 
-        // Position the Text in the center of the canvas
-        RectTransform textRT = textGO.GetComponent<RectTransform>();
-        textRT.anchorMin = new Vector2(0.5f, 0.5f);
-        textRT.anchorMax = new Vector2(0.5f, 0.5f);
-        textRT.pivot = new Vector2(0.5f, 0.5f);
-        textRT.anchoredPosition = Vector2.zero;
-        textRT.sizeDelta = new Vector2(600, 150);
+    // Hub progress, bottom-left: filled dot = adventure visited. UI only.
+    void ShowProgress()
+    {
+        string Dot(string gate) => visitedGates.Contains(gate) ? "●" : "○";
+        var go = ScreenMessage.Show(
+            $"{Dot("terrain")} Forest    {Dot("house")} Dwarf's house    {Dot("rock")} River", 0.06f, 34);
+        var t = go.GetComponentInChildren<Text>();
+        t.alignment = TextAnchor.MiddleLeft;
+        t.rectTransform.anchorMin = t.rectTransform.anchorMax = new Vector2(0f, 0.06f);
+        t.rectTransform.pivot = new Vector2(0f, 0.5f);
+        t.rectTransform.anchoredPosition = new Vector2(30f, 0f);
+    }
+
+    // Hide the panel whenever there is nothing to say
+    void LateUpdate()
+    {
+        if (bannerPanel != null && instructionText != null)
+            bannerPanel.enabled = !string.IsNullOrEmpty(instructionText.text);
     }
 }
