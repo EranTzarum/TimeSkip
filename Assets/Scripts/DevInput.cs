@@ -34,8 +34,13 @@ public class DevInput : MonoBehaviour
 
     public void Where()
     {
+        // Forest/river players are untagged, so fall back to the movement components
         var p = GameObject.FindGameObjectWithTag("Player");
-        Debug.Log($"[DevInput] scene={UnityEngine.SceneManagement.SceneManager.GetActiveScene().name} player={(p != null ? p.transform.position.ToString() : "none")}");
+        if (p == null) p = FindAnyObjectByType<PlayerMovementRiver>()?.gameObject;
+        if (p == null) p = FindAnyObjectByType<PlayerMovementHome>()?.gameObject;
+        var cam = Camera.main;
+        var r = p != null ? p.GetComponentInChildren<SpriteRenderer>() : null;
+        Debug.Log($"[DevInput] scene={UnityEngine.SceneManagement.SceneManager.GetActiveScene().name} player={(p != null ? p.transform.position.ToString() : "none")} cam={(cam != null ? cam.transform.position.ToString() : "none")} visible={(r != null && r.isVisible)} order={(r != null ? r.sortingLayerName + "/" + r.sortingOrder : "-")}");
     }
 
     public void Hold(string spec)

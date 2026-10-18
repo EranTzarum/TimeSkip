@@ -28,7 +28,7 @@ public class PlayerMovementRiver : MonoBehaviour
         float moveX = DevInput.Horizontal(Input.GetAxisRaw("Horizontal")); 
         rb.linearVelocity = new Vector2(moveX * speed, rb.linearVelocity.y);
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) || DevInput.ConsumeJump())
         {
             TryJumpByInput();
         }
