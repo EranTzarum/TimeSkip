@@ -4089,7 +4089,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 848e10235fe13f94eb333c909c4feea1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneToLoad: start
+  sceneToLoad: Start
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

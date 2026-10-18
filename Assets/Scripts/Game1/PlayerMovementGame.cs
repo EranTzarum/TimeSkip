@@ -28,10 +28,21 @@ public class PlayerMovementGame : MonoBehaviour
         float moveX = Input.GetAxisRaw("Horizontal");
         rb.linearVelocity = new Vector2(moveX * speed, rb.linearVelocity.y);
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        // Only jump from the ground; unlimited air jumps let kids fly over the level
+        if (Input.GetKeyDown(KeyCode.Space) && IsGrounded())
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
         }
+    }
+
+    private readonly ContactPoint2D[] contacts = new ContactPoint2D[8];
+
+    private bool IsGrounded()
+    {
+        int n = rb.GetContacts(contacts);
+        for (int i = 0; i < n; i++)
+            if (contacts[i].normal.y > 0.5f) return true;
+        return false;
     }
 
     // When the player object is disabled or destroyed, remember its position.
