@@ -12,7 +12,7 @@ Session files: `%USERPROFILE%\AppData\LocalLow\<company>\<product>\session_logs\
 | 5 | Forest: hit a berry | "Try Again!" once; buttons work once each |
 | 6 | River: wait out the timer | "Time's up!" panel |
 | 7 | River: fall in water / hit fish | "Try Again!"; Restart, Main, Start all work |
-| 8 | Memory: play twice | Answer positions differ between runs; L1 has 3 options; question text is a sentence |
+| 8 | Memory: play | Options in authored order (unchanged by design); question text is a sentence |
 | 9 | Memory: press Space | No "Use right arrow" text |
 | 10 | Memory: lose 3 lives → "Dwarf" | Loads dwarf house |
 | 11 | Spaceship | Quits after ~5 s; a new JSON exists in session_logs |
