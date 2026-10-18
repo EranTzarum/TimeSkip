@@ -11,7 +11,12 @@ public static class BuildScript
 
     public static void BuildWindows() => Build(BuildTarget.StandaloneWindows64, "Builds/Windows/TimeSkip.exe");
 
-    public static void BuildWebGL() => Build(BuildTarget.WebGL, "Builds/WebGL");
+    public static void BuildWebGL()
+    {
+        // Lets the compressed build run from any static server (localhost, itch) without Content-Encoding headers
+        PlayerSettings.WebGL.decompressionFallback = true;
+        Build(BuildTarget.WebGL, "Builds/WebGL");
+    }
 
     static void Build(BuildTarget target, string path)
     {

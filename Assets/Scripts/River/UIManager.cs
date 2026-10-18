@@ -97,6 +97,15 @@ public class UIManager : MonoBehaviour
         if (messageText.gameObject.activeSelf) return; // first end reason wins
         messageText.gameObject.SetActive(true);
         messageText.text = message;
+        // Scenes place this as 14pt text in the bottom-left corner, hidden behind props. Center it above the buttons.
+        var rt = messageText.rectTransform;
+        rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.anchoredPosition = new Vector2(0f, 140f);
+        rt.sizeDelta = new Vector2(700f, 120f);
+        messageText.fontSize = 56;
+        messageText.alignment = TextAnchor.MiddleCenter;
+        messageText.horizontalOverflow = HorizontalWrapMode.Overflow;
+        if (messageText.GetComponent<Outline>() == null) messageText.gameObject.AddComponent<Outline>().effectDistance = new Vector2(2f, -2f);
         Wire(restartButton, RestartGame);
         Wire(mainMenuButton, GoToMainMenu);
         Wire(startButton, GoToStart);
