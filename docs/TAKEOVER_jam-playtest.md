@@ -1,5 +1,5 @@
 # TAKEOVER — jam playtest, UI polish and overnight finish
-Last updated: 2026-10-18 23:05 · branch `jam/s1-stabilize` @ `e4199a7` (local only, no upstream)
+Last updated: 2026-10-19 00:25 · branch `jam/s1-stabilize` @ `8d61141` + docs commits (local only, no upstream)
 
 ## Goal
 Sheba ARC Healthcare Game Jam: submit Mon 2026-10-19 16:00, demo 17:00.
@@ -47,28 +47,29 @@ Eran then tests it himself, uploads to itch, and tests on itch with the ML model
   - STATISTICS shows the session with a working CLOSE.
 - **Hub screenshots:** edge arrow "Forest >>>" visible, red arrows gone, sharp pixels. The forest backdrop was NOT visible yet (`BG_3` covered it); `e4199a7` fixes that.
 
-## Where we stopped
-Background task `bqilv4sw1` was building WebGL with `e4199a7` and then running `hub_shots.py`. Output:
-```
-C:\Users\tzaru\AppData\Local\Temp\claude\C--Users-tzaru-Documents-TimeSkip\95827d21-870a-4be3-93e7-e4974d7a5f70\tasks\bqilv4sw1.output
-```
-Screenshots go to `%TEMP%\reg\hub`. If Unity is no longer running and that output ends with `Succeeded`, check the screenshots. Otherwise rebuild:
-```bash
-"/c/Program Files/Unity/Hub/Editor/6000.0.28f1/Editor/Unity.exe" -batchmode -quit -projectPath "$(pwd -W)" -executeMethod BuildScript.BuildWebGL -logFile "$(cygpath -w "$TMP")\\build-webgl.log"
-sed -i 's/\.then((unityInstance) => {/.then((unityInstance) => { window.unityInstance = unityInstance;/' Builds/WebGL/index.html
-```
-Serve: `python -m http.server 8765 -d Builds/WebGL`, or reuse the browser-pane preview "webgl" (`C:\Users\tzaru\Documents\TimeSkip\.claude\launch.json`). Bots: `cd tools/playtest && py -3 play.py full_flow.py <shots_dir>`.
+- **Overnight (2026-10-19 00:25):**
+  - `73ad1ea`: night tint on the opaque `BG_1`/`BG_2` layers, so day→night→day shows around the house.
+  - `8d61141`: per Eran, the flat cyan sky band on top of the TobaccoLand trees (`Forest Parralax layer4`) is hidden in the hub except near the river (x ≥ 100). The River scene is untouched.
+  - **Final WebGL build `8d61141`:** `full_flow.py` passed:
+    - house wall 50.37;
+    - memory, then the kitchen, then the door back to Start;
+    - ending, then the menu in 7.2 s (HF model 200, probabilities returned);
+    - STATISTICS shows the session.
+    - Screenshots: `%TEMP%\reg\final3`.
+  - **`hub_shots.py` passed:** forest day at the start, night at the house, day trees at the river, no cyan band. Screenshots: `%TEMP%\reg\hub3`.
+  - **Windows build:** `Builds/Windows/TimeSkip.exe`. It ran 15 s and closed cleanly, with 0 exceptions in `Player.log`.
+  - **Upload zips:** in `C:\Users\tzaru\Documents\TimeSkip\upload\`. Not uploaded.
+    - `TimeSkip_WebGL_20261019.zip`: `index.html` at the root; decompression fallback is on, so no server headers are needed.
+    - `TimeSkip_Windows_20261019.zip`.
+  - `docs/MORNING_CHECKLIST.md` written.
+  - Bot note: one earlier `full_flow` run read the scene before the kitchen had finished loading; the bot now waits for the kitchen player.
 
-## Next steps (overnight, in order)
-1. Check the hub screenshots: the forest backdrop shows behind the platforms (day at the start, night around the house, day near the river), and the platforms stay readable. If the backdrop is too busy behind the platforms, darken or desaturate it in code (sprite color, e.g. 0.85 gray), not by editing art.
-2. Run `full_flow.py` and `hub_shots.py` on the final WebGL build. Every step must pass as in the last regression. Fix only regressions, then rebuild once.
-3. Build Windows: `BuildScript.BuildWindows` gives `Builds/Windows/TimeSkip.exe`. Launch it for 15 s and check the log has 0 exceptions.
-4. Prepare the itch upload (do NOT upload): zip `Builds/WebGL` contents (`index.html` at the zip root) as `C:\Users\tzaru\Documents\TimeSkip\upload\TimeSkip_WebGL_<date>.zip`, and zip the Windows build as `TimeSkip_Windows_<date>.zip`.
-5. Write `docs/MORNING_CHECKLIST.md` for Eran:
-   - local test steps;
-   - itch upload steps (Edit game → Uploads → replace the HTML5 zip, "This file will be played in the browser", viewport 960×600);
-   - on-itch test: play to the spaceship, check STATISTICS, and check the session in Supabase `jam_sessions` plus the HF model response in the browser console.
-6. Update this doc and `docs/STATE.md`, commit docs. No push.
+## Where we stopped
+Everything on the overnight list is done. Next is Eran's morning check, following `docs/MORNING_CHECKLIST.md`.
+
+## Next steps
+1. Eran tests locally, uploads `TimeSkip_WebGL_20261019.zip` to itch, and tests on itch with the model (see the checklist).
+2. If he reports a bug: fix it, rebuild WebGL, rerun `full_flow.py` and `hub_shots.py`, then re-zip into `upload/`.
 
 ## Open decisions
 - **Spaceship sprite** is a pngtree image (`Assets/Prefabs/intro/pngtree-alien-spaceships-...png`); its license is unclear. Options: keep it for the jam, or replace it with a Canva AI spaceship. Recommendation: replace if there's time after everything passes; ask Eran first.

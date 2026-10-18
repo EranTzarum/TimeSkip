@@ -1,8 +1,8 @@
 # Time Skip — state
-Last updated: 2026-10-18 23:05
+Last updated: 2026-10-19 00:25
 Branch in progress: `jam/s1-stabilize` (local, not pushed)
 
-**Resume (jam-playtest):** see docs/TAKEOVER_jam-playtest.md
+**Resume (jam-playtest):** see docs/TAKEOVER_jam-playtest.md · morning: docs/MORNING_CHECKLIST.md
 
 - Done: S1 fixes, hub gates, INFO/STATISTICS, shared UI style, forest backdrop, edge arrow, copyright cleanup, playtest bots.
 - In flight: final WebGL build + hub screenshots (bg task), then regression, Windows build, upload zips.
