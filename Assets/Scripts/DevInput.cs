@@ -8,7 +8,19 @@ public class DevInput : MonoBehaviour
 {
     static float axisX, until;
 
+    static bool jumpQueued;
+
     public static float Horizontal(float real) => Time.time < until ? axisX : real;
+
+    // True once per queued jump (page JS: SendMessage("DevInput", "Jump"))
+    public static bool ConsumeJump()
+    {
+        bool j = jumpQueued;
+        jumpQueued = false;
+        return j;
+    }
+
+    public void Jump() => jumpQueued = true;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Create()

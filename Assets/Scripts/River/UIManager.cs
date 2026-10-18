@@ -95,17 +95,23 @@ public class UIManager : MonoBehaviour
     void ShowEndPanel(string message)
     {
         if (messageText.gameObject.activeSelf) return; // first end reason wins
+        // The scene's MessageText is 14pt in a corner and parents two of the buttons, so it can't be moved.
+        // Keep it (empty) for the buttons and show the message as a big centered label instead.
         messageText.gameObject.SetActive(true);
-        messageText.text = message;
-        // Scenes place this as 14pt text in the bottom-left corner, hidden behind props. Center it above the buttons.
-        var rt = messageText.rectTransform;
-        rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0.5f, 0.5f);
-        rt.anchoredPosition = new Vector2(0f, 140f);
-        rt.sizeDelta = new Vector2(700f, 120f);
-        messageText.fontSize = 56;
-        messageText.alignment = TextAnchor.MiddleCenter;
-        messageText.horizontalOverflow = HorizontalWrapMode.Overflow;
-        if (messageText.GetComponent<Outline>() == null) messageText.gameObject.AddComponent<Outline>().effectDistance = new Vector2(2f, -2f);
+        messageText.text = "";
+        var label = new GameObject("EndMessage", typeof(RectTransform)).AddComponent<Text>();
+        label.transform.SetParent(messageText.canvas.transform, false);
+        var rt = label.rectTransform;
+        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.75f);
+        rt.sizeDelta = new Vector2(900f, 140f);
+        label.font = messageText.font;
+        label.text = message;
+        label.fontSize = 64;
+        label.fontStyle = FontStyle.Bold;
+        label.alignment = TextAnchor.MiddleCenter;
+        label.color = Color.white;
+        label.horizontalOverflow = HorizontalWrapMode.Overflow;
+        label.gameObject.AddComponent<Outline>().effectDistance = new Vector2(3f, -3f);
         Wire(restartButton, RestartGame);
         Wire(mainMenuButton, GoToMainMenu);
         Wire(startButton, GoToStart);

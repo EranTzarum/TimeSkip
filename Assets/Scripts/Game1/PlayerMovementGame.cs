@@ -32,7 +32,7 @@ public class PlayerMovementGame : MonoBehaviour
         // jumps got them stuck on obstacles the level was built around.
         bool grounded = IsGrounded();
         if (grounded) airJumpsLeft = airJumps;
-        if (Input.GetKeyDown(KeyCode.Space) && (grounded || airJumpsLeft-- > 0))
+        if ((Input.GetKeyDown(KeyCode.Space) || DevInput.ConsumeJump()) && (grounded || airJumpsLeft-- > 0))
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
         }
