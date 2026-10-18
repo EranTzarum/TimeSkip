@@ -199,6 +199,7 @@ public class InstructionManager : MonoBehaviour
     // The prompt shows once on arrival and the voice repeats every few seconds, instead of
     // re-firing every time the player's collider brushes the trigger edge.
     private static readonly HashSet<string> clearedGates = new HashSet<string>();
+    public static bool IsGateCleared(string gate) => clearedGates.Contains(gate);
     private static readonly HashSet<string> visitedGates = new HashSet<string>(); // entered with ENTER (not skipped)
     private readonly Dictionary<string, GameObject> gateWalls = new Dictionary<string, GameObject>();
     private readonly List<float> skipJumpTimes = new List<float>();
@@ -355,14 +356,14 @@ public class InstructionManager : MonoBehaviour
         startCard = ScreenMessage.Card(title, body, $"Press {ScreenMessage.Key("SPACE")} to start", 20);
     }
 
-    // Hub progress, bottom-left: adventures the child entered with ENTER. UI only.
+    // Hub progress, top-right under the banner (bottom-left covered the player at spawn): adventures the child entered with ENTER. UI only.
     void ShowProgress()
     {
         // Built-in font has no circle glyphs, so done = green, not yet = grey
         string Item(string gate, string name) => visitedGates.Contains(gate)
             ? $"<color=#7CFC7C>{name} - done</color>" : $"<color=#B8BCC8>{name}</color>";
         var canvas = ScreenMessage.Canvas("ProgressCanvas", 9);
-        var panel = ScreenMessage.Panel(canvas.transform, new Vector2(0.01f, 0.015f), new Vector2(0.56f, 0.085f));
+        var panel = ScreenMessage.Panel(canvas.transform, new Vector2(0.52f, 0.735f), new Vector2(0.99f, 0.795f));
         ScreenMessage.Label(panel.transform,
             $"Time machine:   {Item("terrain", "Forest")}    {Item("house", "Dwarf's house")}    {Item("rock", "River")}", 30, TextAnchor.MiddleLeft);
     }
