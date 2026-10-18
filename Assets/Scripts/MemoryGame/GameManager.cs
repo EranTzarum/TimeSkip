@@ -16,6 +16,21 @@ public class GameManager : MonoBehaviour
     // Timestamp when the question (stimulus) becomes visible
     private float questionShownAt = 0f;
 
+    private const string DefaultQuestion = "Which of these did you see in the room?";
+
+    // Next level, or finish after the last one ("NextScene" did not exist).
+    private void AdvanceLevel()
+    {
+        currentLevel++;
+        if (currentLevel >= questionManager.GetTotalQuestions())
+        {
+            try { ExperimentLogger.Instance?.LogDwarfMinigameEnd("memory", "all_levels_cleared"); } catch (Exception) { }
+            SceneManager.LoadScene("kitchen");
+            return;
+        }
+        StartCoroutine(PlayLevel());
+    }
+
     private void Awake()
     {
         if (Instance == null)
@@ -42,9 +57,12 @@ public class GameManager : MonoBehaviour
         Sprite snapshot = SceneSnapshot.Instance.GetSnapshotForLevel(currentLevel);
         string question = questionManager.GetQuestion(currentLevel);
 
-        if (snapshot == null || string.IsNullOrEmpty(question))
+        if (snapshot == null)
         {
-            Debug.LogError($"❌ Missing snapshot or question for level {currentLevel}!");
+            // Used to hang on a blank screen. Skip the level so the session continues.
+            Debug.LogError($"Missing snapshot for level {currentLevel}, skipping level.");
+            try { ExperimentLogger.Instance?.LogMemoryLevelResult(currentLevel, false, "skipped_missing_asset", lives); } catch (Exception) { }
+            AdvanceLevel();
             yield break;
         }
 
@@ -53,16 +71,18 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(5f); // Wait for 5 seconds
 
         uiManager.HideSceneSnapshot(); // Hide image
+        if (uiManager.questionText != null)
+            uiManager.questionText.text = string.IsNullOrWhiteSpace(question) || question.StartsWith("q") ? DefaultQuestion : question;
         uiManager.ShowQuestionPanel(); // Show question panel after image disappears
 
         // Mark stimulus onset and log dwarf_trial_start with shown items and correct item
-        questionShownAt = Time.time;
+        questionShownAt = Time.realtimeSinceStartup;
         try
         {
             if (questionManager != null && currentLevel < questionManager.questions.Length)
             {
                 var q = questionManager.questions[currentLevel];
-                var opts = q.answerOptions;
+                var opts = questionManager.CurrentOptions;
                 var shown = new List<string>(opts != null ? opts.Length : 0);
                 if (opts != null)
                 {
@@ -91,7 +111,7 @@ public class GameManager : MonoBehaviour
             if (questionManager != null && currentLevel < questionManager.questions.Length)
             {
                 var q = questionManager.questions[currentLevel];
-                var opts = q.answerOptions;
+                var opts = questionManager.CurrentOptions;
                 if (opts != null && selectedIndex >= 0 && selectedIndex < opts.Length)
                 {
                     var sel = opts[selectedIndex];
@@ -103,7 +123,8 @@ public class GameManager : MonoBehaviour
         catch (Exception) { }
 
         // Reaction time since the question was shown
-        int rtMs = Mathf.Max(0, (int)Mathf.Round((Time.time - questionShownAt) * 1000f));
+        // realtimeSinceStartup: not frame-quantized like Time.time
+        int rtMs = Mathf.Max(0, (int)Mathf.Round((Time.realtimeSinceStartup - questionShownAt) * 1000f));
         try { ExperimentLogger.Instance?.LogDwarfTrialResponse(currentLevel, selectedItemName, isCorrect, rtMs); } catch (Exception) { }
 
         // Continue original flow using the existing bool-based handler
@@ -118,24 +139,7 @@ public class GameManager : MonoBehaviour
                 ExperimentLogger.Instance?.LogMemoryClick(true, currentLevel, lives);
                 ExperimentLogger.Instance?.LogMemoryLevelResult(currentLevel, true, "answered_correct", lives);
             } catch (Exception) { }
-            currentLevel++;
-
-            if (currentLevel == 4)
-            {
-                try { ExperimentLogger.Instance?.LogDwarfMinigameEnd("memory", "reached_level_4"); } catch (Exception) { }
-                SceneManager.LoadScene("kitchen");
-                return;
-            }
-
-            if (currentLevel >= questionManager.GetTotalQuestions())
-            {
-                try { ExperimentLogger.Instance?.LogDwarfMinigameEnd("memory", "all_levels_cleared"); } catch (Exception) { }
-                SceneManager.LoadScene("NextScene");
-            }
-            else
-            {
-                StartCoroutine(PlayLevel());
-            }
+            AdvanceLevel();
         }
         else
         {
