@@ -40,7 +40,7 @@ public class DevInput : MonoBehaviour
         if (p == null) p = FindAnyObjectByType<PlayerMovementHome>()?.gameObject;
         var cam = Camera.main;
         var r = p != null ? p.GetComponentInChildren<SpriteRenderer>() : null;
-        Debug.Log($"[DevInput] scene={UnityEngine.SceneManagement.SceneManager.GetActiveScene().name} player={(p != null ? p.transform.position.ToString() : "none")} cam={(cam != null ? cam.transform.position.ToString() : "none")} visible={(r != null && r.isVisible)} order={(r != null ? r.sortingLayerName + "/" + r.sortingOrder : "-")}");
+        Debug.Log($"[DevInput] scene={UnityEngine.SceneManagement.SceneManager.GetActiveScene().name} player={(p != null ? p.transform.position.ToString() : "none")} cam={(cam != null ? cam.transform.position.ToString() : "none")} visible={(r != null && r.isVisible)} order={(r != null ? r.sortingLayerName + "/" + r.sortingOrder : "-")} near={Near()}");
     }
 
     public void Hold(string spec)
@@ -49,5 +49,20 @@ public class DevInput : MonoBehaviour
         axisX = float.Parse(p[0], CultureInfo.InvariantCulture);
         axisY = p.Length > 2 ? float.Parse(p[1], CultureInfo.InvariantCulture) : 0f;
         until = Time.time + float.Parse(p[p.Length - 1], CultureInfo.InvariantCulture);
+    }
+
+    // Nearby gameplay objects for scripted play: tag:x:y;...  (tags that are not defined in the project are skipped)
+    static string Near()
+    {
+        var sb = new System.Text.StringBuilder();
+        foreach (var tag in new[] { "Mushroom", "Screw", "Fish", "RiverBankEnd" })
+        {
+            GameObject[] found;
+            try { found = GameObject.FindGameObjectsWithTag(tag); } catch { continue; }
+            foreach (var g in found)
+                sb.Append(tag[0]).Append(':').Append(g.transform.position.x.ToString("F1", CultureInfo.InvariantCulture))
+                  .Append(':').Append(g.transform.position.y.ToString("F1", CultureInfo.InvariantCulture)).Append(';');
+        }
+        return sb.ToString();
     }
 }
