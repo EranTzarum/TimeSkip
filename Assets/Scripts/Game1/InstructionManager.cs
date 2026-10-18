@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
@@ -298,9 +298,12 @@ public class InstructionManager : MonoBehaviour
             var b = col.bounds;
             float x = b.center.x >= startX ? b.max.x + 0.3f : b.min.x - 0.3f;
             const float height = 60f; // covers every platform height at this x
+            // 3 units thick, extending away from the player: a frame stall (dt up to 0.33 s) tunneled through 0.4
+            const float thick = 3f;
+            float away = b.center.x >= startX ? 1f : -1f;
             var wall = new GameObject("GateWall_" + gate);
-            wall.transform.position = new Vector3(x, b.center.y, 0f);
-            wall.AddComponent<BoxCollider2D>().size = new Vector2(0.4f, height);
+            wall.transform.position = new Vector3(x + away * thick / 2f, b.center.y, 0f);
+            wall.AddComponent<BoxCollider2D>().size = new Vector2(thick, height);
             gateWalls[gate] = wall;
             // Tall trigger zone from the entrance to the wall, so the prompt shows at any height
             var zone = new GameObject("GateZone_" + gate);
