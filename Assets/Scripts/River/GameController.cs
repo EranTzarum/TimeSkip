@@ -113,9 +113,7 @@ public class GameController : MonoBehaviour
 
             if (timer >= gameDuration)
             {
-                // Timeout used to destroy the player with no UI (soft-lock). Log it and show an end panel.
-                bool isForest = string.Equals(ExperimentLogger.Instance?.GetCurrentArea(), "forest", StringComparison.OrdinalIgnoreCase);
-                ExperimentLogger.Instance?.LogOutcome(isForest ? "Forest" : "River", "timeout", reason: "time_up");
+                // Timeout used to destroy the player with no UI (soft-lock). UI only: no new log event.
                 uiManager.ShowTimeUp();
                 EndGame();
             }

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -31,20 +30,16 @@ public class QuestionManager : MonoBehaviour
         return questions.Length;
     }
 
-    // Options in the order shown on screen for the current level (deduped + shuffled).
+    // Options in the order shown on screen for the current level.
     public Sprite[] CurrentOptions { get; private set; } = new Sprite[0];
 
     public void PreloadQuestion(int level)
     {
         if (level >= questions.Length) return;
 
-        // Dedupe: Q1 listed the correct sprite 3 times. Shuffle: the correct answer was always slot 0 in Q3/Q4.
-        List<Sprite> answers = questions[level].answerOptions.Where(s => s != null).Distinct().ToList();
-        for (int i = answers.Count - 1; i > 0; i--)
-        {
-            int j = Random.Range(0, i + 1);
-            (answers[i], answers[j]) = (answers[j], answers[i]);
-        }
+        // ponytail: options kept exactly as authored (incl. Q1 duplicates, fixed order) so data stays
+        // comparable with the existing model's training sessions. Dedupe/shuffle only with a model retrain.
+        List<Sprite> answers = new List<Sprite>(questions[level].answerOptions);
         CurrentOptions = answers.ToArray();
         correctAnswerIndex = answers.IndexOf(questions[level].correctAnswer);
 

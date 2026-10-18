@@ -31,7 +31,7 @@ public partial class ExperimentLogger : MonoBehaviour
     [Tooltip("Optional Bearer token for calling via the HF Router. Leave empty for direct subdomain calls.")]
     [SerializeField] private string modelApiBearerToken = "";
     [Tooltip("If true, will send the computed feature vector to the model API after attempting Supabase save.")]
-    [SerializeField] private bool enableModelApiCall = false; // off: HF Space is down and its 20 s timeout delayed the ending; report scores offline
+    [SerializeField] private bool enableModelApiCall = true;
 
     [Header("Prediction Display")]
     [SerializeField] private bool showPredictionOverlay = false; // never show a likelihood to the child

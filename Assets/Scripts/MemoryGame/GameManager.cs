@@ -24,7 +24,7 @@ public class GameManager : MonoBehaviour
         currentLevel++;
         if (currentLevel >= questionManager.GetTotalQuestions())
         {
-            try { ExperimentLogger.Instance?.LogDwarfMinigameEnd("memory", "all_levels_cleared"); } catch (Exception) { }
+            try { ExperimentLogger.Instance?.LogDwarfMinigameEnd("memory", "reached_level_4"); } catch (Exception) { } // original reason string kept for log compatibility
             SceneManager.LoadScene("kitchen");
             return;
         }
@@ -76,7 +76,7 @@ public class GameManager : MonoBehaviour
         uiManager.ShowQuestionPanel(); // Show question panel after image disappears
 
         // Mark stimulus onset and log dwarf_trial_start with shown items and correct item
-        questionShownAt = Time.realtimeSinceStartup;
+        questionShownAt = Time.time;
         try
         {
             if (questionManager != null && currentLevel < questionManager.questions.Length)
@@ -123,8 +123,7 @@ public class GameManager : MonoBehaviour
         catch (Exception) { }
 
         // Reaction time since the question was shown
-        // realtimeSinceStartup: not frame-quantized like Time.time
-        int rtMs = Mathf.Max(0, (int)Mathf.Round((Time.realtimeSinceStartup - questionShownAt) * 1000f));
+        int rtMs = Mathf.Max(0, (int)Mathf.Round((Time.time - questionShownAt) * 1000f));
         try { ExperimentLogger.Instance?.LogDwarfTrialResponse(currentLevel, selectedItemName, isCorrect, rtMs); } catch (Exception) { }
 
         // Continue original flow using the existing bool-based handler
