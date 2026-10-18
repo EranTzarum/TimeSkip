@@ -50,15 +50,17 @@ public partial class ExperimentLogger
                              || supabaseUrl.Contains("YOUR-PROJECT-REF")
                              || supabaseAnonKey.Contains("YOUR-ANON");
 
+        // Always keep the full log on disk first, synchronously: survives offline play and app quit,
+        // and is what the clinician report reads.
+        SaveSessionLocalNow();
+
         if (notConfigured)
         {
-            Debug.LogWarning("[ExperimentLogger] Supabase not configured. Saving session locally instead.");
-            yield return SaveSessionLocally();
+            Debug.LogWarning("[ExperimentLogger] Supabase not configured. Session kept locally only.");
             yield break;
         }
 
         // Per request: send only the summary line in the JSON log to Supabase.
-        // The full log is still saved locally unchanged.
         string sessionExportJson = BuildSummaryOnlyJson();
         string jsonBody = BuildSupabaseRowJson(sessionExportJson);
 
@@ -80,7 +82,6 @@ public partial class ExperimentLogger
             if (req.result != UnityWebRequest.Result.Success)
             {
                 Debug.LogError($"[ExperimentLogger] Supabase error: {req.responseCode} {req.error}\n{req.downloadHandler.text}");
-                yield return SaveSessionLocally();
             }
             else
             {
@@ -459,7 +460,10 @@ public partial class ExperimentLogger
         return null;
     }
 
-    private IEnumerator SaveSessionLocally()
+    // Path of the last session file written to disk (read by the clinician report).
+    public string LastLocalSessionPath { get; private set; }
+
+    private void SaveSessionLocalNow()
     {
         try
         {
@@ -500,13 +504,13 @@ public partial class ExperimentLogger
                            $"dwarf_correct={dwarfCorrect}, dwarf_incorrect={dwarfIncorrect}";
             string content = header + "\n" + json;
             File.WriteAllText(path, content, Encoding.UTF8);
+            LastLocalSessionPath = path;
             Debug.Log($"[ExperimentLogger] Session saved locally at {path}");
         }
         catch (Exception ex)
         {
             Debug.LogError($"[ExperimentLogger] Failed to save locally: {ex.Message}");
         }
-        yield break;
     }
 
     [Serializable]

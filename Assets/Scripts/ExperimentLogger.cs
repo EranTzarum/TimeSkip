@@ -31,10 +31,10 @@ public partial class ExperimentLogger : MonoBehaviour
     [Tooltip("Optional Bearer token for calling via the HF Router. Leave empty for direct subdomain calls.")]
     [SerializeField] private string modelApiBearerToken = "";
     [Tooltip("If true, will send the computed feature vector to the model API after attempting Supabase save.")]
-    [SerializeField] private bool enableModelApiCall = true;
+    [SerializeField] private bool enableModelApiCall = false; // off: HF Space is down and its 20 s timeout delayed the ending; report scores offline
 
     [Header("Prediction Display")]
-    [SerializeField] private bool showPredictionOverlay = true;
+    [SerializeField] private bool showPredictionOverlay = false; // never show a likelihood to the child
     [SerializeField] private float predictionShowSeconds = 5f;
     [SerializeField] private int predictionFontSize = 48;
     [SerializeField] private Color predictionTextColor = default;
@@ -125,9 +125,22 @@ public partial class ExperimentLogger : MonoBehaviour
         }
     }
 
+    // Pseudonymous code shown to the clinician; no names are collected or uploaded.
+    public string SessionCode { get; private set; }
+
+    static string NewSessionCode()
+    {
+        const string alphabet = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"; // no 0/O/1/I/L
+        var chars = new char[6];
+        for (int i = 0; i < chars.Length; i++) chars[i] = alphabet[UnityEngine.Random.Range(0, alphabet.Length)];
+        return new string(chars);
+    }
+
     public void StartNewSession()
     {
         sessionStartTime = Time.time;
+        SessionCode = NewSessionCode();
+        playerName = SessionCode; // player_name column now holds the pseudonym
         session = new SessionData
         {
             sessionId = Guid.NewGuid().ToString(),

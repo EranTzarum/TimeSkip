@@ -14,9 +14,6 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/main.unity
     guid: 1f690a3bba50794449723b0122e0c07c
-  - enabled: 0
-    path: Assets/Scenes/icy.unity
-    guid: 5b03851ce846825498f88bb27dea470b
   - enabled: 1
     path: Assets/Scenes/Start.unity
     guid: 5cc389eec3bf4f64a9685dbc02f64d82

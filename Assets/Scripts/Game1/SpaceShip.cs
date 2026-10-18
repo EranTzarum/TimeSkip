@@ -50,6 +50,11 @@ public class SpaceShip : MonoBehaviour
     private static void DoQuit()
     {
         Debug.Log("Quitting game after logs were sent.");
+#if UNITY_WEBGL && !UNITY_EDITOR
+        // Application.Quit does nothing in the browser; S2 replaces this with the Ending scene
+        SceneManager.LoadScene("main");
+        return;
+#endif
         Application.Quit();
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
