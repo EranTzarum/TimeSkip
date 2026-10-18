@@ -92,7 +92,7 @@ public class InstructionManager : MonoBehaviour
             // Show forest instructions only if not shown before
             if (!forestInstructionsShown)
             {
-                instructionText.text = "Collect the screws to fix the time machine! Avoid the berries, they are poisonous! Press any key to start.";
+                ShowStartCard("The magic forest", $"Catch 5 falling screws\nUse {ScreenMessage.Key("LEFT")} {ScreenMessage.Key("RIGHT")} to move, {ScreenMessage.Key("SPACE")} to jump\nStay on the screen - the forest keeps moving");
                 // Mark we have shown forest instructions
                 forestInstructionsShown = true;
                 currentState = InstructionState.waitingForAnyKey;
@@ -111,7 +111,7 @@ public class InstructionManager : MonoBehaviour
             // Show river instructions only if not shown before
             if (!riverInstructionsShown)
             {
-                instructionText.text = "Welcome to the river! Be careful of the piranhas! Press any key to start.";
+                ShowStartCard("The river", $"Jump from rock to rock to cross\nUse {ScreenMessage.Key("LEFT")} {ScreenMessage.Key("RIGHT")} to move, {ScreenMessage.Key("SPACE")} to jump\nWatch out for the piranhas");
                 // Mark we have shown river instructions
                 riverInstructionsShown = true;
                 currentState = InstructionState.waitingForAnyKey;
@@ -138,7 +138,7 @@ public class InstructionManager : MonoBehaviour
             if (!startInstructionsShown)
             {
                 // Show the original "start" instructions once
-                instructionText.text = "Use space key to jump.";
+                instructionText.text = $"Press {ScreenMessage.Key("SPACE")} to jump";
                 startInstructionsShown = true;
                 currentState = InstructionState.WaitingForJump;
                 // Voice prompt for the start jump instruction
@@ -164,7 +164,7 @@ public class InstructionManager : MonoBehaviour
                 if (Input.GetKeyDown(KeyCode.Space))
                 {
                     currentState = InstructionState.WaitingForArrow;
-                    instructionText.text = "Use right arrow to go right or left arrow to go left.";
+                    instructionText.text = $"Use {ScreenMessage.Key("LEFT")} and {ScreenMessage.Key("RIGHT")} to walk";
                 }
                 break;
 
@@ -174,6 +174,7 @@ public class InstructionManager : MonoBehaviour
                 {
                     currentState = InstructionState.Completed;
                     instructionText.text = "";
+                    if (startCard != null) Destroy(startCard);
                 }
                 break;
 
@@ -231,11 +232,10 @@ public class InstructionManager : MonoBehaviour
         activeGateScene = gateInfo[gate].scene;
         skipJumpTimes.Clear();
         currentState = InstructionState.Completed; // tutorial steps no longer apply
-        instructionText.color = new Color(1f, 0.9f, 0.35f); // gate prompts stand out from tutorial text
         string action = gateInfo[gate].action;
         instructionText.text = clearedGates.Contains(gate)
-            ? $"Press ENTER to {action}."
-            : $"Press ENTER to {action}.\n(Or jump 3 times to skip it.)";
+            ? $"Press {ScreenMessage.Key("ENTER")} to {action}"
+            : $"Press {ScreenMessage.Key("ENTER")} to {action}\n<size=32><color=#D8DCEF>Not now? Jump 3 times with {ScreenMessage.Key("SPACE")}</color></size>";
         if (Time.time >= nextVoiceAt)
         {
             PlayInstructionVoice();
@@ -270,7 +270,7 @@ public class InstructionManager : MonoBehaviour
             if (skipJumpTimes.Count >= SkipJumps)
             {
                 ClearGate(activeGate);
-                instructionText.text = "Skipped! You can keep going.";
+                instructionText.text = "Skipped - you can keep going";
                 return;
             }
         }
@@ -336,67 +336,42 @@ public class InstructionManager : MonoBehaviour
         }
     }
 
-    // Instruction banner: screen-space panel at the top, so the text never covers the player.
+    // Instruction banner: screen-space panel at the top in the shared jam style, so the text never covers the player.
     // (Was a magenta world-space text in the middle of the screen.)
     Image bannerPanel;
+    GameObject startCard;
 
     void SetupCanvasAndText()
     {
-        GameObject canvasGO = new GameObject("InstructionCanvas");
-        Canvas canvas = canvasGO.AddComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = 10;
-        CanvasScaler scaler = canvasGO.AddComponent<CanvasScaler>();
-        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920, 1080);
-        scaler.matchWidthOrHeight = 0.5f;
-
-        GameObject panelGO = new GameObject("InstructionPanel");
-        panelGO.transform.SetParent(canvasGO.transform, false);
-        bannerPanel = panelGO.AddComponent<Image>();
-        bannerPanel.color = new Color(0.06f, 0.08f, 0.16f, 0.85f);
-        bannerPanel.raycastTarget = false;
-        RectTransform panelRT = bannerPanel.rectTransform;
-        panelRT.anchorMin = new Vector2(0.12f, 0.80f);
-        panelRT.anchorMax = new Vector2(0.88f, 0.97f);
-        panelRT.offsetMin = panelRT.offsetMax = Vector2.zero;
-
-        GameObject textGO = new GameObject("InstructionText");
-        textGO.transform.SetParent(panelGO.transform, false);
-        instructionText = textGO.AddComponent<Text>();
-        instructionText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        instructionText.fontSize = 46;
-        instructionText.fontStyle = FontStyle.Bold;
-        instructionText.alignment = TextAnchor.MiddleCenter;
-        instructionText.color = Color.white;
-        instructionText.horizontalOverflow = HorizontalWrapMode.Wrap;
-        instructionText.verticalOverflow = VerticalWrapMode.Overflow;
-        instructionText.raycastTarget = false;
-        RectTransform textRT = instructionText.rectTransform;
-        textRT.anchorMin = Vector2.zero;
-        textRT.anchorMax = Vector2.one;
-        textRT.offsetMin = new Vector2(30f, 10f);
-        textRT.offsetMax = new Vector2(-30f, -10f);
+        var canvas = ScreenMessage.Canvas("InstructionCanvas", 10);
+        bannerPanel = ScreenMessage.Panel(canvas.transform, new Vector2(0.14f, 0.81f), new Vector2(0.86f, 0.97f));
+        instructionText = ScreenMessage.Label(bannerPanel.transform, "", 46);
     }
 
-    // Hub progress, bottom-left: filled dot = adventure visited. UI only.
+    // Forest/river intro: a centered card instead of the banner; any key still starts the game
+    void ShowStartCard(string title, string body)
+    {
+        instructionText.text = "";
+        startCard = ScreenMessage.Card(title, body, $"Press {ScreenMessage.Key("SPACE")} to start", 20);
+    }
+
+    // Hub progress, bottom-left: adventures the child entered with ENTER. UI only.
     void ShowProgress()
     {
-        // Built-in font has no circle glyphs, so visited = green, not yet = grey
+        // Built-in font has no circle glyphs, so done = green, not yet = grey
         string Item(string gate, string name) => visitedGates.Contains(gate)
-            ? $"<color=#7CFC7C>{name} - done</color>" : $"<color=#D0D0D0>{name}</color>";
-        var go = ScreenMessage.Show($"{Item("terrain", "Forest")}    {Item("house", "Dwarf's house")}    {Item("rock", "River")}", 0.06f, 34);
-        var t = go.GetComponentInChildren<Text>();
-        t.alignment = TextAnchor.MiddleLeft;
-        t.rectTransform.anchorMin = t.rectTransform.anchorMax = new Vector2(0f, 0.06f);
-        t.rectTransform.pivot = new Vector2(0f, 0.5f);
-        t.rectTransform.anchoredPosition = new Vector2(30f, 0f);
+            ? $"<color=#7CFC7C>{name} - done</color>" : $"<color=#B8BCC8>{name}</color>";
+        var canvas = ScreenMessage.Canvas("ProgressCanvas", 9);
+        var panel = ScreenMessage.Panel(canvas.transform, new Vector2(0.01f, 0.015f), new Vector2(0.56f, 0.085f));
+        ScreenMessage.Label(panel.transform,
+            $"Time machine:   {Item("terrain", "Forest")}    {Item("house", "Dwarf's house")}    {Item("rock", "River")}", 30, TextAnchor.MiddleLeft);
     }
 
     // Hide the panel whenever there is nothing to say
     void LateUpdate()
     {
-        if (bannerPanel != null && instructionText != null)
-            bannerPanel.enabled = !string.IsNullOrEmpty(instructionText.text);
+        if (bannerPanel == null || instructionText == null) return;
+        bool show = !string.IsNullOrEmpty(instructionText.text);
+        if (bannerPanel.gameObject.activeSelf != show) bannerPanel.gameObject.SetActive(show);
     }
 }

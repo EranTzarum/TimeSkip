@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement; // Add this line
@@ -85,48 +85,37 @@ public class UIManager : MonoBehaviour
         gameTimerText.text = "Time: " + Mathf.Ceil(timeLeft).ToString() + "s";
     }
 
-    public void ShowWellDone() => ShowEndPanel("Well Done!");
+    public void ShowWellDone() => ShowEndPanel("Well done!",
+        isForest ? "You caught all 5 screws" : "You crossed the river");
 
-    public void ShowTryAgain() => ShowEndPanel("Try Again!");
+    public void ShowTryAgain() => ShowEndPanel("Nice try!",
+        isForest ? $"You caught {screwsCollected} of {totalScrews} screws" : "The river was too strong this time");
 
-    public void ShowTimeUp() => ShowEndPanel("Time's up! Good job!");
+    public void ShowTimeUp() => ShowEndPanel("Time's up!",
+        isForest ? $"You caught {screwsCollected} of {totalScrews} screws" : "Good effort");
 
-    // Called from several end paths; listeners are reset so they never stack.
-    void ShowEndPanel(string message)
+    // Called from several end paths; the first end reason wins.
+    // Shared jam style: a centered card with three clear buttons. The scene's small corner buttons stay hidden.
+    bool endShown;
+    void ShowEndPanel(string title, string subtitle)
     {
-        if (messageText.gameObject.activeSelf) return; // first end reason wins
-        // The scene's MessageText is 14pt in a corner and parents two of the buttons, so it can't be moved.
-        // Keep it (empty) for the buttons and show the message as a big centered label instead.
-        messageText.gameObject.SetActive(true);
-        messageText.text = "";
-        var label = new GameObject("EndMessage", typeof(RectTransform)).AddComponent<Text>();
-        label.transform.SetParent(messageText.canvas.transform, false);
-        var rt = label.rectTransform;
-        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.75f);
-        rt.sizeDelta = new Vector2(900f, 140f);
-        label.font = messageText.font;
-        label.text = message;
-        label.fontSize = 64;
-        label.fontStyle = FontStyle.Bold;
-        label.alignment = TextAnchor.MiddleCenter;
-        label.color = Color.white;
-        label.horizontalOverflow = HorizontalWrapMode.Overflow;
-        label.gameObject.AddComponent<Outline>().effectDistance = new Vector2(3f, -3f);
-        Wire(restartButton, RestartGame);
-        Wire(mainMenuButton, GoToMainMenu);
-        Wire(startButton, GoToStart);
+        if (endShown) return;
+        endShown = true;
+        var canvas = ScreenMessage.Canvas("EndCard", 30);
+        var panel = ScreenMessage.Panel(canvas.transform, new Vector2(0.3f, 0.2f), new Vector2(0.7f, 0.82f), lineOnTop: true);
+        var t = ScreenMessage.Label(panel.transform, title, 64, TextAnchor.MiddleCenter, new Vector2(0f, 0.8f), new Vector2(1f, 1f));
+        t.color = ScreenMessage.Gold;
+        ScreenMessage.Label(panel.transform, subtitle, 38, TextAnchor.MiddleCenter, new Vector2(0f, 0.64f), new Vector2(1f, 0.8f));
+        ScreenMessage.Button(panel.transform, "Play again", true, RestartGame, new Vector2(0.15f, 0.43f), new Vector2(0.85f, 0.57f));
+        ScreenMessage.Button(panel.transform, "Back to the map", false, GoToStart, new Vector2(0.15f, 0.25f), new Vector2(0.85f, 0.39f));
+        ScreenMessage.Button(panel.transform, "Main menu", false, GoToMainMenu, new Vector2(0.15f, 0.07f), new Vector2(0.85f, 0.21f));
     }
 
-    static void Wire(Button button, UnityEngine.Events.UnityAction action)
-    {
-        button.gameObject.SetActive(true);
-        button.onClick.RemoveAllListeners();
-        button.onClick.AddListener(action);
-    }
-
+    bool restarting;
     void RestartGame()
     {
-        restartButton.interactable = false;
+        if (restarting) return;
+        restarting = true;
         if (GameController.Instance != null) GameController.Instance.RestartGame();
         else SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
