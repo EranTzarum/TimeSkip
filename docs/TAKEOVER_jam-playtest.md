@@ -44,7 +44,7 @@ Fixed this session (commits `32aa47b`..`ca94726`):
 - `DevInput`: vertical axis, Where finds untagged players and lists nearby objects.
 
 ## Where we stopped
-Final WebGL and Windows builds were running. Check the exe launches, then the checklist rows 11-12.
+Final builds at `ca94726` are done: `Builds/WebGL` (20:10) and `Builds/Windows/TimeSkip.exe` (20:18, launches, 0 errors in the log). Nothing pushed. Waiting on the top-edge decision, then UI polish.
 
 ## Next steps
 1. Decide the open item below (forest and river top edge).
