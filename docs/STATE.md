@@ -1,9 +1,9 @@
 # Time Skip — state
-Last updated: 2026-10-18 21:30
+Last updated: 2026-10-18 23:05
 Branch in progress: `jam/s1-stabilize` (local, not pushed)
 
 **Resume (jam-playtest):** see docs/TAKEOVER_jam-playtest.md
 
-- Done: S1 bug fixes; hub gates; double jump; INFO and STATISTICS screens.
-- In flight: real-flow playtest of the WebGL build.
-- Next: river, memory-pass, kitchen and spaceship edge cases, then UI polish and the clinician report.
+- Done: S1 fixes, hub gates, INFO/STATISTICS, shared UI style, forest backdrop, edge arrow, copyright cleanup, playtest bots.
+- In flight: final WebGL build + hub screenshots (bg task), then regression, Windows build, upload zips.
+- Next: morning checklist for Eran; he tests, uploads to itch, tests with the model.

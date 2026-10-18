@@ -1,76 +1,98 @@
-# TAKEOVER — jam playtest and flow fixes
-Last updated: 2026-10-18 20:30 · branch `jam/s1-stabilize` @ `ca94726`
+# TAKEOVER — jam playtest, UI polish and overnight finish
+Last updated: 2026-10-18 23:05 · branch `jam/s1-stabilize` @ `e4199a7` (local only, no upstream)
 
 ## Goal
-Sheba ARC Healthcare Game Jam (submit Mon 2026-10-19 16:00, demo 17:00). Make Time Skip demo-ready: fix bugs, edge cases and the game flow first; UI polish, clinician report and pitch come after. The full plan and timeline are in `C:\Users\tzaru\Documents\TimeSkip\JAM_PLAN.md`.
+Sheba ARC Healthcare Game Jam: submit Mon 2026-10-19 16:00, demo 17:00.
+By the time Eran wakes up, the game must be:
+- built (WebGL and Windows);
+- regression-tested;
+- polished;
+- working exactly as before in every level.
+
+Eran then tests it himself, uploads to itch, and tests on itch with the ML model. Full plan: `C:\Users\tzaru\Documents\TimeSkip\JAM_PLAN.md`.
 
 ## Done (evidence)
-- Windows build and WebGL build both compile: `[BuildScript] ... Succeeded, 0 errors`.
-- S1 fixes (commits `baabee8`..`fe124ef`):
-  - timeout panel instead of a soft-lock;
-  - forest win no longer depends on a sound;
-  - pseudonymous 6-char session code;
-  - local session JSON always written;
-  - no child-facing prediction;
-  - Supabase writes to the `jam_sessions` table.
-- Team rule (`105daee`): the model and the 23-feature logs are unchanged; jam changes are UI and stability only.
-- Hub, menu and test hook (`4bd259d`):
-  - 5 working menu buttons (INFO and STATISTICS are runtime overlays);
-  - double jump;
-  - gated hub entrances: the prompt shows once and the voice repeats every 8 s; an invisible wall blocks until Enter or a 3-jump skip, with an on-screen hint; a tall gate zone covers every height;
-  - `DevInput` test hook.
-- Verified by playing the WebGL build in the browser pane:
-  - menu, INFO and STATISTICS;
-  - walking START to the forest gate with the double jump;
-  - the gate prompt and its wall;
-  - entering the forest with Enter, and "go to main game" returning to the same spot with the gate cleared;
-  - the house 3-jump skip.
-
-## Playtest results (2026-10-18 evening, WebGL, bots in tools/playtest)
-Verified by playing:
-- **Hub:** gate prompt; Enter enters; 3-jump skip; walls hold (house 50.4, river 122.2); return to the same spot.
-- **Memory:** wrong answer drops a life and now shows "Not that one - try again!"; all 4 levels pass, then the kitchen.
-- **Kitchen:** new hint on screen; walking down through the door returns to Start.
-- **Ending:** spaceship shows a thank-you message, then the menu after about 6 s; STATISTICS shows the session.
-- **Forest:** catching screws works (2 caught in one run); 90 s timeout ends the round.
-- **River:** loses come easily; a pass was not reached by the bot (rocks have no tag or RockId).
-
-Fixed this session (commits `32aa47b`..`ca94726`):
-- gate walls 3 units thick: a frame stall tunneled through the old 0.4 wall;
-- memory wrong-answer feedback (UI only);
-- kitchen hint (`ScreenMessage` helper);
-- ending: message on screen; waits for the upload at most 10 s, with the same 5 s timing before the save;
-- CLOSE label on INFO and STATISTICS was invisible (two Graphics on one object);
-- `DevInput`: vertical axis, Where finds untagged players and lists nearby objects.
+- **S1 fixes, hub gates, double jump, INFO and STATISTICS:** commits up to `c188d5f`.
+- **This session (28 commits, `32aa47b`..`e4199a7`):**
+  - **Gate walls:** 3 units thick; a frame stall had tunneled through 0.4.
+  - **Memory:** wrong-answer feedback.
+  - **Kitchen:** hint.
+  - **Ending:** a card, then the menu within 10 s; the timing before the save is unchanged.
+  - **CLOSE label:** fixed on INFO and STATISTICS.
+  - **Shared UI kit (`Assets/Scripts/ScreenMessage.cs`):** navy panel and gold accent, used for:
+    - the instruction banner, with key names;
+    - hub progress (top-right);
+    - forest and river start cards;
+    - the win/try-again card ("Play again / Back to the map / Main menu");
+    - the ending card.
+  - **YOU marker:** over the forest and river player.
+  - **Sharp pixels:** `filterMode 0` on pixel-art texture metas (514 files; only that line changed).
+  - **Copyright:**
+    - no Fire Emblem sprites left in the build scenes (hub grass strip emptied, memory panel set to a flat color);
+    - FE PNGs remain in the repo but are unreferenced by built scenes.
+  - **`Assets/Scripts/Game1/HubVisuals.cs` (Start scene, visual only):**
+    - day→night→day forest backdrop from `Assets/Resources/Sky/sky_day.jpg` and `sky_night.jpg` (Canva AI, forest interior), fading by player x: night 36→46, full until 96, day by 108;
+    - hides the opaque `BG_3` sky layer when the backdrop loads;
+    - hides the old static red arrows;
+    - edge guide arrow to the next uncleared gate, then the spaceship;
+    - drawing-only feet offset on the floor (y < -3; no collider change).
+  - **Playtest bots in `tools/playtest`:**
+    - `play.py` drives a visible Chromium window at 60 fps;
+    - scenarios `full_flow.py`, `hub_shots.py`, `ui_shots.py`, `forest.py`, `river.py`;
+    - see `tools/playtest/README.md`.
+- **Last full regression (build before `e4199a7`):** `full_flow.py` passed:
+  - gates (3-jump skip, walls at 50.37 and 122.2);
+  - memory 4 levels, then the kitchen, then the door back to Start;
+  - spaceship ending, then the menu in 7.2 s (HF model answered 200);
+  - STATISTICS shows the session with a working CLOSE.
+- **Hub screenshots:** edge arrow "Forest >>>" visible, red arrows gone, sharp pixels. The forest backdrop was NOT visible yet (`BG_3` covered it); `e4199a7` fixes that.
 
 ## Where we stopped
-Final builds at `ca94726` are done: `Builds/WebGL` (20:10) and `Builds/Windows/TimeSkip.exe` (20:18, launches, 0 errors in the log). Nothing pushed. Waiting on the top-edge decision, then UI polish.
+Background task `bqilv4sw1` was building WebGL with `e4199a7` and then running `hub_shots.py`. Output:
+```
+C:\Users\tzaru\AppData\Local\Temp\claude\C--Users-tzaru-Documents-TimeSkip\95827d21-870a-4be3-93e7-e4974d7a5f70\tasks\bqilv4sw1.output
+```
+Screenshots go to `%TEMP%\reg\hub`. If Unity is no longer running and that output ends with `Succeeded`, check the screenshots. Otherwise rebuild:
+```bash
+"/c/Program Files/Unity/Hub/Editor/6000.0.28f1/Editor/Unity.exe" -batchmode -quit -projectPath "$(pwd -W)" -executeMethod BuildScript.BuildWebGL -logFile "$(cygpath -w "$TMP")\\build-webgl.log"
+sed -i 's/\.then((unityInstance) => {/.then((unityInstance) => { window.unityInstance = unityInstance;/' Builds/WebGL/index.html
+```
+Serve: `python -m http.server 8765 -d Builds/WebGL`, or reuse the browser-pane preview "webgl" (`C:\Users\tzaru\Documents\TimeSkip\.claude\launch.json`). Bots: `cd tools/playtest && py -3 play.py full_flow.py <shots_dir>`.
 
-## Next steps
-1. Decide the open item below (forest and river top edge).
-2. UI polish: gate prompt overlaps the player and is hard to read; forest player is tiny at the bottom; Fire Emblem tiles.
-3. Clinician report, pitch, trailer, submission.
+## Next steps (overnight, in order)
+1. Check the hub screenshots: the forest backdrop shows behind the platforms (day at the start, night around the house, day near the river), and the platforms stay readable. If the backdrop is too busy behind the platforms, darken or desaturate it in code (sprite color, e.g. 0.85 gray), not by editing art.
+2. Run `full_flow.py` and `hub_shots.py` on the final WebGL build. Every step must pass as in the last regression. Fix only regressions, then rebuild once.
+3. Build Windows: `BuildScript.BuildWindows` gives `Builds/Windows/TimeSkip.exe`. Launch it for 15 s and check the log has 0 exceptions.
+4. Prepare the itch upload (do NOT upload): zip `Builds/WebGL` contents (`index.html` at the zip root) as `C:\Users\tzaru\Documents\TimeSkip\upload\TimeSkip_WebGL_<date>.zip`, and zip the Windows build as `TimeSkip_Windows_<date>.zip`.
+5. Write `docs/MORNING_CHECKLIST.md` for Eran:
+   - local test steps;
+   - itch upload steps (Edit game → Uploads → replace the HTML5 zip, "This file will be played in the browser", viewport 960×600);
+   - on-itch test: play to the spaceship, check STATISTICS, and check the session in Supabase `jam_sessions` plus the HF model response in the browser console.
+6. Update this doc and `docs/STATE.md`, commit docs. No push.
 
 ## Open decisions
-- **Leaving through the top of the screen counts as a loss** (forest and river). In the forest, bouncing on a mushroom does it; in the river, Space has unlimited air jumps, so spamming it does it in ~7 s. Ignoring the top edge would be friendlier, but `out_of_bounds` counts are model features, so it changes the data. Needs Eran (and Itamar). Recommendation: leave as-is for the jam, mention it in the pitch as a known design point.
-- **Standing still loses fast** (forest ~4 s, river ~2-3 s after the countdown): by design (auto-scroller), same data concern.
-- Untracked Unity-generated files: ignore (unchanged recommendation).
+- **Spaceship sprite** is a pngtree image (`Assets/Prefabs/intro/pngtree-alien-spaceships-...png`); its license is unclear. Options: keep it for the jam, or replace it with a Canva AI spaceship. Recommendation: replace if there's time after everything passes; ask Eran first.
+- **Top-edge out-of-bounds loss** (forest and river): Eran decided to keep it (data stays comparable).
+- **Feet offset** threshold `FloorY = -3.0`, drop 0.35, in `HubVisuals.cs`; tune only if the screenshots show sinking.
 
-## Owner to-dos
-- Ask Itamar which pkl the Space should serve (`noise_model.pkl` vs `adhd_model.pkl`), and whether `game_dataset.csv` comes from real children.
-- Ask the organizers on Discord whether building on a pre-existing project is allowed.
-- Optional: watch the browser pane live while the playtest runs.
+## Owner to-dos (Eran, morning)
+- Test the build locally, upload to itch, and test on itch with the ML model (see `docs/MORNING_CHECKLIST.md` once written).
+- Ask Itamar which pkl the Space should serve, and whether `game_dataset.csv` comes from real children.
+- Ask the organizers whether building on a pre-existing project is allowed.
+- Decide on push/merge of `jam/s1-stabilize` (local only).
 
 ## Rules that applied
-- Never push without Eran's OK; never push to main. Commit small, on the jam branch.
-- No real patient data; the 50 old `session_logs` rows in Supabase are never read.
-- The model and the 23 features are unchanged; any change to the logs needs Eran's explicit OK.
-- Only one Unity instance at a time on this project.
-- Never print secrets. The Supabase anon key is in `ExperimentLogger.cs`; the HF token goes in an env var.
+- Never push, and never touch main, without Eran's OK. Commit small, on `jam/s1-stabilize`.
+- The model and the 23-feature logs stay unchanged (no gameplay timing or physics changes without OK). UI and visual changes only.
+- No real patient data. One Unity instance at a time. Never print secrets (the Supabase anon key is in `ExperimentLogger.cs`).
+- Prefer one build per batch of changes; Eran dislikes many rebuilds.
+- Canva: the Canva connection can export images by swapping the fill in design `DAHYYiyvzqY` and exporting PNG. Direct thumbnail URLs are signed and low-res.
 
 ## Not mine (left alone)
 Unity-generated during builds, not staged:
-- `Assets/TextMesh Pro/.../Oswald Bold SDF.asset`
-- `ProjectSettings/ProjectSettings.asset` (WebGL compression settings written by BuildScript)
+- `Oswald Bold SDF.asset`
+- `ProjectSettings/ProjectSettings.asset`
 - `Assets/Resources/PerformanceTestRun*.json`
 - `Assets/Unity.VisualScripting.Generated/`
+
+`Assets/Resources/Sky.meta` and the sky `.jpg.meta` files are build-generated metas for this session's images; commit them with the next code commit.
