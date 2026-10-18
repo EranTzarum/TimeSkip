@@ -18,6 +18,8 @@ public class HubVisuals : MonoBehaviour
     Camera cam;
     Transform player;
     SpriteRenderer day, night;
+    readonly System.Collections.Generic.List<SpriteRenderer> sceneBackdrops = new();
+    static readonly Color NightTint = new Color(0.38f, 0.42f, 0.68f, 1f);
     SpriteRenderer playerRenderer, playerVisual;
     RectTransform arrow;
     Text arrowText;
@@ -62,6 +64,11 @@ public class HubVisuals : MonoBehaviour
             foreach (var r in FindObjectsByType<SpriteRenderer>(FindObjectsSortMode.None))
                 if (r.sprite != null && r.sprite.texture != null && r.sprite.texture.name.StartsWith("BG_3"))
                     r.enabled = false;
+        // The painted layers around the house (BG_1, BG_2) are opaque, so they get the night as a tint
+        foreach (var r in FindObjectsByType<SpriteRenderer>(FindObjectsSortMode.None))
+            if (r.enabled && r.sprite != null && r.sprite.texture != null
+                && (r.sprite.texture.name.StartsWith("BG_1") || r.sprite.texture.name.StartsWith("BG_2")))
+                sceneBackdrops.Add(r);
     }
 
     SpriteRenderer SkyLayer(string name, Texture2D tex, int order)
@@ -142,6 +149,8 @@ public class HubVisuals : MonoBehaviour
             night.transform.position = skyPos;
             night.color = new Color(1f, 1f, 1f, NightAmount(px));
         }
+        var tint = Color.Lerp(Color.white, NightTint, NightAmount(px));
+        foreach (var r in sceneBackdrops) if (r != null) r.color = tint;
 
         // Player drawing: same sprite and facing as the hidden real renderer
         if (playerVisual != null && playerRenderer != null)
