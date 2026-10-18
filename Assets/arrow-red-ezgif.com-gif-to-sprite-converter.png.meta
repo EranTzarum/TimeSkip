@@ -256,6 +256,19 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
@@ -1372,7 +1385,57 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      arrow-red-ezgif.com-gif-to-sprite-converter_0: -1351316507750685857
+      arrow-red-ezgif.com-gif-to-sprite-converter_1: 8929152898456088412
+      arrow-red-ezgif.com-gif-to-sprite-converter_10: 8221726543658105923
+      arrow-red-ezgif.com-gif-to-sprite-converter_11: 5934412458408179072
+      arrow-red-ezgif.com-gif-to-sprite-converter_12: 1157595941367191593
+      arrow-red-ezgif.com-gif-to-sprite-converter_13: -6232493404281703342
+      arrow-red-ezgif.com-gif-to-sprite-converter_14: -950559472376111568
+      arrow-red-ezgif.com-gif-to-sprite-converter_15: 5364560143754091323
+      arrow-red-ezgif.com-gif-to-sprite-converter_16: -4289733117857843134
+      arrow-red-ezgif.com-gif-to-sprite-converter_17: -3426986296860226144
+      arrow-red-ezgif.com-gif-to-sprite-converter_18: -5534492689757569628
+      arrow-red-ezgif.com-gif-to-sprite-converter_19: -6566733261655249437
+      arrow-red-ezgif.com-gif-to-sprite-converter_2: -3106785675994672424
+      arrow-red-ezgif.com-gif-to-sprite-converter_20: 6424710998252410585
+      arrow-red-ezgif.com-gif-to-sprite-converter_21: 5143483844957724788
+      arrow-red-ezgif.com-gif-to-sprite-converter_22: 4733221456957395367
+      arrow-red-ezgif.com-gif-to-sprite-converter_23: -8074799425166376140
+      arrow-red-ezgif.com-gif-to-sprite-converter_24: -8137221140714020570
+      arrow-red-ezgif.com-gif-to-sprite-converter_25: -8629809417530881795
+      arrow-red-ezgif.com-gif-to-sprite-converter_26: 410579441974337675
+      arrow-red-ezgif.com-gif-to-sprite-converter_27: 2246664900832399302
+      arrow-red-ezgif.com-gif-to-sprite-converter_28: 8135511025413172485
+      arrow-red-ezgif.com-gif-to-sprite-converter_29: -5764817352071374709
+      arrow-red-ezgif.com-gif-to-sprite-converter_3: -1648187362874113111
+      arrow-red-ezgif.com-gif-to-sprite-converter_30: 8973424861630350475
+      arrow-red-ezgif.com-gif-to-sprite-converter_31: -9056435492477453847
+      arrow-red-ezgif.com-gif-to-sprite-converter_32: -2520718630099714516
+      arrow-red-ezgif.com-gif-to-sprite-converter_33: 4095761283659107947
+      arrow-red-ezgif.com-gif-to-sprite-converter_34: -2444775292451707184
+      arrow-red-ezgif.com-gif-to-sprite-converter_35: 8015614530140416215
+      arrow-red-ezgif.com-gif-to-sprite-converter_36: 357766893599685563
+      arrow-red-ezgif.com-gif-to-sprite-converter_37: 237911841236412855
+      arrow-red-ezgif.com-gif-to-sprite-converter_38: -5322817294927764683
+      arrow-red-ezgif.com-gif-to-sprite-converter_39: -2239533739283403910
+      arrow-red-ezgif.com-gif-to-sprite-converter_4: 2285020546953383577
+      arrow-red-ezgif.com-gif-to-sprite-converter_40: -3967477211128741208
+      arrow-red-ezgif.com-gif-to-sprite-converter_41: -6534659005213382273
+      arrow-red-ezgif.com-gif-to-sprite-converter_42: 8668423162966772314
+      arrow-red-ezgif.com-gif-to-sprite-converter_43: 1889290699936473033
+      arrow-red-ezgif.com-gif-to-sprite-converter_44: -5383665763514576236
+      arrow-red-ezgif.com-gif-to-sprite-converter_45: 722256139152369769
+      arrow-red-ezgif.com-gif-to-sprite-converter_46: 6207882941020223403
+      arrow-red-ezgif.com-gif-to-sprite-converter_47: 3844158512348783208
+      arrow-red-ezgif.com-gif-to-sprite-converter_48: 321722499849888047
+      arrow-red-ezgif.com-gif-to-sprite-converter_49: -7182285928079302200
+      arrow-red-ezgif.com-gif-to-sprite-converter_5: 7692641201529091632
+      arrow-red-ezgif.com-gif-to-sprite-converter_6: 6947572098884399322
+      arrow-red-ezgif.com-gif-to-sprite-converter_7: -7895247149938137518
+      arrow-red-ezgif.com-gif-to-sprite-converter_8: 8089561195570627479
+      arrow-red-ezgif.com-gif-to-sprite-converter_9: 2229788098537590855
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
