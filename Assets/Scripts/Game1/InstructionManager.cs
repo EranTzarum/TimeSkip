@@ -354,13 +354,12 @@ public class InstructionManager : MonoBehaviour
         GameObject panelGO = new GameObject("InstructionPanel");
         panelGO.transform.SetParent(canvasGO.transform, false);
         bannerPanel = panelGO.AddComponent<Image>();
-        bannerPanel.color = new Color(0.05f, 0.07f, 0.12f, 0.78f);
+        bannerPanel.color = new Color(0.06f, 0.08f, 0.16f, 0.85f);
         bannerPanel.raycastTarget = false;
         RectTransform panelRT = bannerPanel.rectTransform;
         panelRT.anchorMin = new Vector2(0.12f, 0.80f);
         panelRT.anchorMax = new Vector2(0.88f, 0.97f);
         panelRT.offsetMin = panelRT.offsetMax = Vector2.zero;
-        panelGO.AddComponent<Outline>().effectColor = new Color(1f, 0.85f, 0.3f, 0.9f);
 
         GameObject textGO = new GameObject("InstructionText");
         textGO.transform.SetParent(panelGO.transform, false);
@@ -383,9 +382,10 @@ public class InstructionManager : MonoBehaviour
     // Hub progress, bottom-left: filled dot = adventure visited. UI only.
     void ShowProgress()
     {
-        string Dot(string gate) => visitedGates.Contains(gate) ? "●" : "○";
-        var go = ScreenMessage.Show(
-            $"{Dot("terrain")} Forest    {Dot("house")} Dwarf's house    {Dot("rock")} River", 0.06f, 34);
+        // Built-in font has no circle glyphs, so visited = green, not yet = grey
+        string Item(string gate, string name) => visitedGates.Contains(gate)
+            ? $"<color=#7CFC7C>{name} - done</color>" : $"<color=#D0D0D0>{name}</color>";
+        var go = ScreenMessage.Show($"{Item("terrain", "Forest")}    {Item("house", "Dwarf's house")}    {Item("rock", "River")}", 0.06f, 34);
         var t = go.GetComponentInChildren<Text>();
         t.alignment = TextAnchor.MiddleLeft;
         t.rectTransform.anchorMin = t.rectTransform.anchorMax = new Vector2(0f, 0.06f);
