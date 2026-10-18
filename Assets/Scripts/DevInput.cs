@@ -63,6 +63,10 @@ public class DevInput : MonoBehaviour
                 sb.Append(tag[0]).Append(':').Append(g.transform.position.x.ToString("F1", CultureInfo.InvariantCulture))
                   .Append(':').Append(g.transform.position.y.ToString("F1", CultureInfo.InvariantCulture)).Append(';');
         }
+        // River rocks are untagged platforms; they carry RockId
+        foreach (var rock in FindObjectsByType<RockId>(FindObjectsSortMode.None))
+            sb.Append("K:").Append(rock.transform.position.x.ToString("F1", CultureInfo.InvariantCulture))
+              .Append(':').Append(rock.transform.position.y.ToString("F1", CultureInfo.InvariantCulture)).Append(';');
         return sb.ToString();
     }
 }
