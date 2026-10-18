@@ -3,14 +3,16 @@ using UnityEngine;
 
 // Test hook for automated playtests of the WebGL build: browser key taps are too short to count as "held",
 // so page JS holds a direction with unityInstance.SendMessage("DevInput", "Hold", "1,2.5") (x direction, seconds).
-// ponytail: horizontal only; add more axes when a test needs them.
+// Optional third value is y: "0,1,1.5" holds up for 1.5 s (top-down rooms).
 public class DevInput : MonoBehaviour
 {
-    static float axisX, until;
+    static float axisX, axisY, until;
 
     static bool jumpQueued;
 
     public static float Horizontal(float real) => Time.time < until ? axisX : real;
+
+    public static float Vertical(float real) => Time.time < until ? axisY : real;
 
     // True once per queued jump (page JS: SendMessage("DevInput", "Jump"))
     public static bool ConsumeJump()
@@ -40,6 +42,7 @@ public class DevInput : MonoBehaviour
     {
         var p = spec.Split(',');
         axisX = float.Parse(p[0], CultureInfo.InvariantCulture);
-        until = Time.time + float.Parse(p[1], CultureInfo.InvariantCulture);
+        axisY = p.Length > 2 ? float.Parse(p[1], CultureInfo.InvariantCulture) : 0f;
+        until = Time.time + float.Parse(p[p.Length - 1], CultureInfo.InvariantCulture);
     }
 }

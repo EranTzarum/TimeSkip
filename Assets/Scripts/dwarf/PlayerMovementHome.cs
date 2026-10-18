@@ -300,7 +300,7 @@ public class PlayerMovementHome : MonoBehaviour
     private void Update()
     {
         // Get movement input
-        moveInput = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+        moveInput = new Vector2(DevInput.Horizontal(Input.GetAxisRaw("Horizontal")), DevInput.Vertical(Input.GetAxisRaw("Vertical")));
 
         // Determine direction and set current sprites
         if (moveInput.x > 0)
