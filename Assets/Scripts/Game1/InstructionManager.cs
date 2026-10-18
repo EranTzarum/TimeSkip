@@ -68,6 +68,8 @@ public class InstructionManager : MonoBehaviour
     private InstructionState currentState = InstructionState.WaitingForJump;
     private Text instructionText;
 
+    public bool IsCompleted => currentState == InstructionState.Completed;
+
     void Start()
     {
         audioSource = GetComponent<AudioSource>();

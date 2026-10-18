@@ -1,5 +1,4 @@
 using System;
-using System.Reflection;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -49,7 +48,7 @@ public class GameController : MonoBehaviour
         // Find UIManager in scene if reference is lost
         if (uiManager == null)
         {
-            uiManager = FindObjectOfType<UIManager>();
+            uiManager = FindAnyObjectByType<UIManager>();
             if (uiManager == null)
             {
                 Debug.LogError("UIManager not found in scene!");
@@ -58,7 +57,7 @@ public class GameController : MonoBehaviour
         }
 
         // --- NEW: Find the InstructionManager in the scene ---
-        instructionManager = FindObjectOfType<InstructionManager>();
+        instructionManager = FindAnyObjectByType<InstructionManager>();
         if (instructionManager == null)
         {
             Debug.LogError("InstructionManager not found in scene!");
@@ -70,23 +69,8 @@ public class GameController : MonoBehaviour
     {
         if (!gameStarted)
         {
-            // --- NEW: Wait until InstructionManager.currentState is Completed ---
-            bool instructionsComplete = false;
-            if (instructionManager != null)
-            {
-                // Use reflection to get the private 'currentState' field from InstructionManager.
-                FieldInfo field = typeof(InstructionManager).GetField("currentState", BindingFlags.NonPublic | BindingFlags.Instance);
-                if (field != null)
-                {
-                    object currentStateValue = field.GetValue(instructionManager);
-                    // Parse the "Completed" enum value from the InstructionManager's private enum.
-                    Type enumType = field.FieldType;
-                    object completedValue = Enum.Parse(enumType, "Completed");
-                    instructionsComplete = currentStateValue.Equals(completedValue);
-                }
-            }
-
-            if (instructionsComplete)
+            // Wait until the instructions are done before the countdown
+            if (instructionManager == null || instructionManager.IsCompleted)
             {
                 if (!countdownStarted)
                 {
@@ -129,6 +113,10 @@ public class GameController : MonoBehaviour
 
             if (timer >= gameDuration)
             {
+                // Timeout used to destroy the player with no UI (soft-lock). Log it and show an end panel.
+                bool isForest = string.Equals(ExperimentLogger.Instance?.GetCurrentArea(), "forest", StringComparison.OrdinalIgnoreCase);
+                ExperimentLogger.Instance?.LogOutcome(isForest ? "Forest" : "River", "timeout", reason: "time_up");
+                uiManager.ShowTimeUp();
                 EndGame();
             }
         }

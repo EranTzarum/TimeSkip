@@ -85,48 +85,46 @@ public class UIManager : MonoBehaviour
         gameTimerText.text = "Time: " + Mathf.Ceil(timeLeft).ToString() + "s";
     }
 
-    public void ShowWellDone()
+    public void ShowWellDone() => ShowEndPanel("Well Done!");
+
+    public void ShowTryAgain() => ShowEndPanel("Try Again!");
+
+    public void ShowTimeUp() => ShowEndPanel("Time's up! Good job!");
+
+    // Called from several end paths; listeners are reset so they never stack.
+    void ShowEndPanel(string message)
     {
+        if (messageText.gameObject.activeSelf) return; // first end reason wins
         messageText.gameObject.SetActive(true);
-        messageText.text = "Well Done!";
-        restartButton.gameObject.SetActive(true);
-        mainMenuButton.gameObject.SetActive(true); 
-        startButton.gameObject.SetActive(true);
-        restartButton.onClick.AddListener(RestartGame);
-        mainMenuButton.onClick.AddListener(GoToMainMenu); 
-        startButton.onClick.AddListener(GoToStart); // Add this line
+        messageText.text = message;
+        Wire(restartButton, RestartGame);
+        Wire(mainMenuButton, GoToMainMenu);
+        Wire(startButton, GoToStart);
     }
 
-    public void ShowTryAgain()
+    static void Wire(Button button, UnityEngine.Events.UnityAction action)
     {
-        messageText.gameObject.SetActive(true);
-        messageText.text = "Try Again!";
-        restartButton.gameObject.SetActive(true);
-        mainMenuButton.gameObject.SetActive(true); 
-        startButton.gameObject.SetActive(true);
-        restartButton.onClick.AddListener(RestartGame);
-        mainMenuButton.onClick.AddListener(GoToMainMenu); 
-        startButton.onClick.AddListener(GoToStart); // Add this line
+        button.gameObject.SetActive(true);
+        button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(action);
     }
 
     void RestartGame()
     {
-        // Disable button and remove listener to prevent multiple clicks
         restartButton.interactable = false;
-        restartButton.onClick.RemoveAllListeners();
-        
-        // Call restart on GameController
-        FindObjectOfType<GameController>().RestartGame();
+        if (GameController.Instance != null) GameController.Instance.RestartGame();
+        else SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     void GoToMainMenu()
     {
-        // Load the main menu scene
-        FindAnyObjectByType<GameController>().GoToMainMenu();
+        if (GameController.Instance != null) GameController.Instance.GoToMainMenu();
+        else SceneManager.LoadScene("main");
     }
+
     void GoToStart()
     {
-        // Load the main menu scene
-        FindAnyObjectByType<GameController>().GoToStart();
+        if (GameController.Instance != null) GameController.Instance.GoToStart();
+        else SceneManager.LoadScene("Start");
     }
 }

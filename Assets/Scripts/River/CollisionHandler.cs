@@ -1,4 +1,3 @@
-using Unity.VisualScripting;
 using UnityEngine;
 using System;
 
@@ -42,13 +41,17 @@ public class CollisionHandler : MonoBehaviour
         CheckOutOfBounds();
     }
 
+    private bool outOfBoundsHandled = false;
+
     void CheckOutOfBounds()
     {
+        if (outOfBoundsHandled || mainCamera == null) return; // was re-firing every frame when GameController was missing
         Vector3 viewPos = mainCamera.WorldToViewportPoint(transform.position);
         
         // Check if player is out of camera view (viewport coordinates are normalized 0 to 1)
         if (viewPos.x < 0 || viewPos.x > 1 || viewPos.y < 0 || viewPos.y > 1)
         {
+            outOfBoundsHandled = true;
             try
             {
                 bool isForest = false;
@@ -176,8 +179,10 @@ public class CollisionHandler : MonoBehaviour
             catch (Exception) { }
             Destroy(collision.gameObject);
             uiManager.CollectScrew();
-            if ((uiManager.screwsCollected == uiManager.totalScrews) && (PlaySound(victorySound) == true))
+            // Win must not depend on whether a victory sound is assigned
+            if (uiManager.screwsCollected == uiManager.totalScrews)
             {
+                PlaySound(victorySound);
                 try { ExperimentLogger.Instance?.LogOutcome("Forest", "win", reason: "collected_all_screws"); } catch (Exception) { }
                 uiManager.ShowWellDone();
                 if (GameController.Instance != null)
