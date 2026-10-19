@@ -69,7 +69,7 @@ public class SpaceShip : MonoBehaviour
 
     private static Text ResultCard()
     {
-        var canvas = ScreenMessage.Canvas("ResultCard", 60);
+        var canvas = ScreenMessage.Canvas("ResultCard", 200);
         var panel = ScreenMessage.Panel(canvas.transform, new Vector2(0.2f, 0.18f), new Vector2(0.8f, 0.86f), lineOnTop: true);
         var title = ScreenMessage.Label(panel.transform, "Session complete", 60, TextAnchor.MiddleCenter, new Vector2(0f, 0.82f), new Vector2(1f, 1f));
         title.color = ScreenMessage.Gold;
@@ -82,18 +82,19 @@ public class SpaceShip : MonoBehaviour
         return body;
     }
 
-    // Model answer: {"prediction":[0|1], "probabilities":[[p0, p1]]}; p1 is the ADHD class
+    // Model answer: {"prediction":[0|1], "probabilities":[[p0, p1]]}
+    // Same text as the original ending: the predicted class and its probability
     private static string ResultText(string resp)
     {
         var m = string.IsNullOrEmpty(resp) ? null
-            : Regex.Match(resp, @"""probabilities""\s*:\s*\[\s*\[\s*[-\d.eE+]+\s*,\s*([-\d.eE+]+)");
+            : Regex.Match(resp, @"""probabilities""\s*:\s*\[\s*\[\s*([-\d.eE+]+)\s*,\s*([-\d.eE+]+)");
         if (m == null || !m.Success)
-            return "<size=46><b>ADHD signal: not available</b></size>\n\nThe model did not answer this time\n(offline, or the service is waking up).";
-        double p = double.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture);
+            return "<size=46><b>Result not available</b></size>\n\nThe model did not answer this time\n(offline, or the service is waking up).";
         bool flagged = Regex.IsMatch(resp, @"""prediction""\s*:\s*\[\s*1\s*\]");
+        double p = double.Parse(m.Groups[flagged ? 2 : 1].Value, CultureInfo.InvariantCulture);
         string color = flagged ? "#FF8A65" : "#81C784";
-        string verdict = flagged ? "ADHD pattern detected" : "No ADHD pattern detected";
-        return $"<size=40>ADHD signal</size>\n<size=110><b><color={color}>{p * 100:0}%</color></b></size>\n<size=42><b>{verdict}</b></size>";
+        string label = flagged ? "ADHD detected." : "No ADHD detected.";
+        return $"<size=64><b><color={color}>{label}</color></b></size>\n\n<size=48>the probability is: <b>{p.ToString("0.###", CultureInfo.InvariantCulture)}</b></size>";
     }
 
     private static void GoToStatistics()
