@@ -138,6 +138,24 @@ Sheba ARC Healthcare Game Jam 2026.";
         var sb = new StringBuilder();
         var sessions = LoadSessions();
 
+        // Clinician view: the model's result for the last round, big, before the details
+        if (sessions.Count > 0)
+        {
+            var last = sessions[0];
+            sb.AppendLine($"<b>Last round ({last.When:dd/MM HH:mm}, code {last.Code})</b>");
+            if (last.ModelP.HasValue)
+            {
+                double p = last.ModelP.Value;
+                bool flagged = p >= 0.5; // the model's own predict() threshold
+                string color = flagged ? "#FF8A65" : "#81C784";
+                sb.AppendLine($"<size=44><b>ADHD model signal: <color={color}>{p * 100:0}%</color></b></size>");
+                sb.AppendLine(flagged ? "Model prediction: <b>ADHD pattern</b> (signal 50% or more)" : "Model prediction: <b>no ADHD pattern</b> (signal below 50%)");
+            }
+            else
+                sb.AppendLine("<size=32><b>ADHD model signal: not available</b></size>\nThe model did not answer for this round (offline or the service was asleep).");
+            sb.AppendLine();
+        }
+
         sb.AppendLine("<b>Sessions on this device</b>");
         if (sessions.Count == 0)
         {
