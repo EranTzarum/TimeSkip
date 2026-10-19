@@ -63,6 +63,7 @@ Eran then tests it himself, uploads to itch, and tests on itch with the ML model
     - `TimeSkip_Windows_20261019.zip`.
   - `docs/MORNING_CHECKLIST.md` written.
   - Bot note: one earlier `full_flow` run read the scene before the kitchen had finished loading; the bot now waits for the kitchen player.
+  - `307762e` (morning, Eran's request): STATISTICS shows the last round's ADHD model signal big at the top (clinician view; the child never sees it). WebGL rebuilt and re-zipped at 11:51. The bot's 60 s wall-stuck run missed the 3-jump skip twice while Eran was using the laptop; a 30 s run skipped fine.
 
 ## Where we stopped
 Everything on the overnight list is done. Next is Eran's morning check, following `docs/MORNING_CHECKLIST.md`.
