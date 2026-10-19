@@ -14,6 +14,20 @@ public class MenuOverlay : MonoBehaviour
 {
     static MenuOverlay open;
 
+    // Set by the ending card: the main menu opens straight on STATISTICS
+    public static bool OpenStatisticsOnLoad;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    static void Hook()
+    {
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded += (scene, _) =>
+        {
+            if (scene.name != "main" || !OpenStatisticsOnLoad) return;
+            OpenStatisticsOnLoad = false;
+            ShowStatistics();
+        };
+    }
+
     public static void ShowInfo() => Show("About Time Skip", InfoText());
     public static void ShowStatistics() => Show("Statistics (clinicians & researchers)", StatisticsText());
 
@@ -27,7 +41,9 @@ public class MenuOverlay : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape)) Destroy(gameObject);
+        // ENTER also closes, so the ending flow is ENTER (statistics), ENTER (main menu)
+        if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+            Destroy(gameObject);
     }
 
     void Build(string title, string body)
@@ -74,7 +90,7 @@ public class MenuOverlay : MonoBehaviour
         close.gameObject.AddComponent<Image>().color = new Color(0.95f, 0.78f, 0.25f);
         close.gameObject.AddComponent<Button>().onClick.AddListener(() => Destroy(gameObject));
         // A GameObject holds one Graphic, so the label goes on a child of the Image
-        var closeLabel = Label(Rect("Label", close, Vector2.zero, Vector2.one), "CLOSE (Esc)", 34, TextAnchor.MiddleCenter);
+        var closeLabel = Label(Rect("Label", close, Vector2.zero, Vector2.one), "CLOSE (Enter)", 34, TextAnchor.MiddleCenter);
         closeLabel.color = Color.black;
     }
 

@@ -245,16 +245,19 @@ public partial class ExperimentLogger
             }
             req.timeout = 20; // seconds
 
+            LastModelResponse = null;
             Debug.Log($"[ExperimentLogger] Sending {features.Length} features to model API: {modelApiUrl}");
             yield return req.SendWebRequest();
 
             if (req.result != UnityWebRequest.Result.Success)
             {
                 Debug.LogError($"[ExperimentLogger] Model API error: {req.responseCode} {req.error}\n{req.downloadHandler.text}");
+                LastModelResponse = ""; // answered with an error: the ending card stops waiting
             }
             else
             {
                 string resp = req.downloadHandler.text;
+                LastModelResponse = resp; // the ending card shows it
                 // Keep the model's answer next to the session file, for the clinician STATISTICS view only
                 try
                 {
@@ -265,15 +268,13 @@ public partial class ExperimentLogger
                 if (!string.IsNullOrEmpty(resp) && resp.Length > 500) resp = resp.Substring(0, 500) + "...";
                 Debug.Log($"[ExperimentLogger] Model API response ({req.responseCode}): {resp}");
 
-                // Try to extract a concise prediction text from the response and show it on screen
-                string display = ExtractPredictionText(resp);
-                if (!string.IsNullOrWhiteSpace(display))
-                {
-                    ShowPredictionOnScreen(display);
-                }
+                // The ending card (SpaceShip) shows the result now; the old plain-text overlay is not used
             }
         }
     }
+
+    // Raw answer of the last model call, or null while waiting / after an error
+    public static string LastModelResponse;
 
     // Dedicated parser for our model API schema:
     // {"prediction":[0|1], "probabilities":[[p0, p1]]}
